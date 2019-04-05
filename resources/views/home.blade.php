@@ -48,7 +48,9 @@
 
     <div class="container alert alert-danger">
         {{ session()->get('mensaje_error') }}
-        <a href="{{ route('home') }}" class="close">&times;</a>  
+        &nbsp;
+        &nbsp;
+        <input type="button" class="btn btn-sm btn-danger" value="x" onclick="javascript:window.location.reload();"/>  
     </div><br />
     
 @endif
@@ -77,6 +79,7 @@
         @include('tablas.tabla_registros')
         @include('modals.modal_create')
         @include('modals.modal_delete')
+        @include('modals.modal_edit')
         
     @endif
 

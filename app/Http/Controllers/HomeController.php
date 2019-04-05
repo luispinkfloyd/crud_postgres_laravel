@@ -301,127 +301,195 @@ class HomeController extends Controller
 	public function store(Request $request)
     {
 		
+		try
 		
-		$database = $request->database;
+		{
 		
-		$schema = $request->schema;
-		
-		$db_usuario = $request->session()->get('db_usuario');
-		
-		$db_host = $request->session()->get('db_host');
-		
-		Config::set('database.connections.pgsql_variable', array(
-			'driver'    => 'pgsql',
-			'host'      => $db_host,
-			'database'  => $database,
-			'username'  => $db_usuario,
-			'password'  => $request->session()->get('db_contrasenia'),
-			'charset'   => 'utf8',
-			'collation' => 'utf8_unicode_ci',
-			'prefix'    => '',
-			'schema'    => $schema,
-		));
-		
-		$conexion = DB::connection('pgsql_variable');
-		
-		$tabla_selected = $request->tabla_selected;
-		
-		$sql="select column_name
-					,is_nullable as required
-					,character_maximum_length as max_char
-					,data_type as type
-		            ,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
-			    from INFORMATION_SCHEMA.columns col 
-			   where table_name = '".$tabla_selected."'
-				 and table_schema = '".$schema."'
-			order by col.ordinal_position";
-		
-		$columnas = $conexion->select($sql);
-		
-		$insert = '';
-		
-		$columnas_registro = '';
-		
-		foreach($columnas as $columna){
+			$database = $request->database;
 			
-			$columnas_registro = $columnas_registro.$columna->column_name.',';
+			$schema = $request->schema;
 			
-			$columna_registro = $columna->column_name;
+			$db_usuario = $request->session()->get('db_usuario');
 			
-			if($request->$columna_registro === NULL){
+			$db_host = $request->session()->get('db_host');
+			
+			Config::set('database.connections.pgsql_variable', array(
+				'driver'    => 'pgsql',
+				'host'      => $db_host,
+				'database'  => $database,
+				'username'  => $db_usuario,
+				'password'  => $request->session()->get('db_contrasenia'),
+				'charset'   => 'utf8',
+				'collation' => 'utf8_unicode_ci',
+				'prefix'    => '',
+				'schema'    => $schema,
+			));
+			
+			$conexion = DB::connection('pgsql_variable');
+			
+			$tabla_selected = $request->tabla_selected;
+			
+			$sql="select column_name
+						,is_nullable as required
+						,character_maximum_length as max_char
+						,data_type as type
+						,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
+					from INFORMATION_SCHEMA.columns col 
+				   where table_name = '".$tabla_selected."'
+					 and table_schema = '".$schema."'
+				order by col.ordinal_position";
+			
+			$columnas = $conexion->select($sql);
+			
+			$insert = '';
+			
+			$columnas_registro = '';
+			
+			foreach($columnas as $columna){
 				
-				$insert = $insert.'NULL,';
+				$columnas_registro = $columnas_registro.$columna->column_name.',';
 				
-			}else{
-			
-				if($columna->type === 'timestamp without time zone'){
+				$columna_registro = $columna->column_name;
+				
+				if($request->$columna_registro === NULL){
 					
-					$timestamp_without_time_zone = date('Y-m-d H:i:s', strtotime($request->$columna_registro));
-					
-					$insert = $insert."'".$timestamp_without_time_zone."',";
+					$insert = $insert.'NULL,';
 					
 				}else{
 				
-					$insert = $insert."'".$request->$columna_registro."',";
+					if($columna->type === 'timestamp without time zone'){
+						
+						$timestamp_without_time_zone = date('Y-m-d H:i:s', strtotime($request->$columna_registro));
+						
+						$insert = $insert."'".$timestamp_without_time_zone."',";
+						
+					}else{
 					
+						$insert = $insert."'".$request->$columna_registro."',";
+						
+					}
+				  
 				}
-			  
+				
 			}
 			
+			$columnas_registro = trim($columnas_registro, ',');
+			
+			$insert = trim($insert, ',');
+			
+			/*echo $columnas_registro;
+			
+			echo '<br>';
+			
+			echo $insert;
+			
+			exit;*/
+			
+			$conexion->insert('insert into '.$tabla_selected.' ('.$columnas_registro.') values ('.$insert.')');
+			
+			
+			return back()->withInput()->with('registro_agregado', 'El registro se agregó correctamente');
 		}
-		
-		$columnas_registro = trim($columnas_registro, ',');
-		
-		$insert = trim($insert, ',');
-		
-		/*echo $columnas_registro;
-		
-		echo '<br>';
-		
-		echo $insert;
-		
-		exit;*/
-		
-		$conexion->insert('insert into '.$tabla_selected.' ('.$columnas_registro.') values ('.$insert.')');
-		
-		
-		return back()->withInput()->with('registro_agregado', 'El registro se agregó correctamente');
+		catch (\Exception $e) {
+			
+			$mensaje_error = $e->getMessage();
+			
+			return back()->withInput()->with('mensaje_error',$mensaje_error);
+			
+		}
 		
     }
 	
 	public function destroy($id,Request $request)
 	{
 		
-		$database = $request->database;
+		try
+		{
 		
-		$schema = $request->schema;
+			$database = $request->database;
+			
+			$schema = $request->schema;
+			
+			$db_usuario = $request->session()->get('db_usuario');
+			
+			$db_host = $request->session()->get('db_host');
+			
+			Config::set('database.connections.pgsql_variable', array(
+				'driver'    => 'pgsql',
+				'host'      => $db_host,
+				'database'  => $database,
+				'username'  => $db_usuario,
+				'password'  => $request->session()->get('db_contrasenia'),
+				'charset'   => 'utf8',
+				'collation' => 'utf8_unicode_ci',
+				'prefix'    => '',
+				'schema'    => $schema,
+			));
+			
+			$conexion = DB::connection('pgsql_variable');
+			
+			$tabla_selected = $request->tabla_selected;
+			
+			$primera_columna = $request->primera_columna;
+			
+			$conexion->delete('delete from '.$tabla_selected.' where '.$primera_columna."::text = '".$id."'");
+			
+			return back()->withInput()->with('registro_eliminado', 'El registro se eliminó correctamente');
 		
-		$db_usuario = $request->session()->get('db_usuario');
+		}
+		catch (\Exception $e) {
+			
+			$mensaje_error = $e->getMessage();
+			
+			return back()->withInput()->with('mensaje_error',$mensaje_error);
+			
+		}
+    }
+	
+	public function edit($id,Request $request)
+	{
 		
-		$db_host = $request->session()->get('db_host');
+		try
+		{
 		
-		Config::set('database.connections.pgsql_variable', array(
-			'driver'    => 'pgsql',
-			'host'      => $db_host,
-			'database'  => $database,
-			'username'  => $db_usuario,
-			'password'  => $request->session()->get('db_contrasenia'),
-			'charset'   => 'utf8',
-			'collation' => 'utf8_unicode_ci',
-			'prefix'    => '',
-			'schema'    => $schema,
-		));
+			/*$database = $request->database;
+			
+			$schema = $request->schema;
+			
+			$db_usuario = $request->session()->get('db_usuario');
+			
+			$db_host = $request->session()->get('db_host');
+			
+			Config::set('database.connections.pgsql_variable', array(
+				'driver'    => 'pgsql',
+				'host'      => $db_host,
+				'database'  => $database,
+				'username'  => $db_usuario,
+				'password'  => $request->session()->get('db_contrasenia'),
+				'charset'   => 'utf8',
+				'collation' => 'utf8_unicode_ci',
+				'prefix'    => '',
+				'schema'    => $schema,
+			));
+			
+			$conexion = DB::connection('pgsql_variable');
+			
+			$tabla_selected = $request->tabla_selected;
+			
+			$primera_columna = $request->primera_columna;
+			
+			$conexion->delete('delete from '.$tabla_selected.' where '.$primera_columna."::text = '".$id."'");
+			
+			return back()->withInput()->with('registro_eliminado', 'El registro se eliminó correctamente');*/
 		
-		$conexion = DB::connection('pgsql_variable');
-		
-		$tabla_selected = $request->tabla_selected;
-		
-		$primera_columna = $request->primera_columna;
-		
-		$conexion->delete('delete from '.$tabla_selected.' where '.$primera_columna."::text = '".$id."'");
-		
-		return back()->withInput()->with('registro_eliminado', 'El registro se eliminó correctamente');
-		
+		}
+		catch (\Exception $e) {
+			
+			$mensaje_error = $e->getMessage();
+			
+			return back()->withInput()->with('mensaje_error',$mensaje_error);
+			
+		}
     }
 	
 }
