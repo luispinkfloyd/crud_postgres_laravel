@@ -385,7 +385,7 @@ class HomeController extends Controller
 			
 			exit;*/
 			
-			$conexion->insert('insert into '.$tabla_selected.' ('.$columnas_registro.') values ('.$insert.')');
+			$conexion->insert('insert into '.$tabla_selected.' ('.$columnas_registro.') values ('.$insert.');');
 			
 			
 			return back()->withInput()->with('registro_agregado', 'El registro se agregó correctamente');
@@ -432,7 +432,7 @@ class HomeController extends Controller
 			
 			$primera_columna = $request->primera_columna;
 			
-			$conexion->delete('delete from '.$tabla_selected.' where '.$primera_columna."::text = '".$id."'");
+			$conexion->delete('delete from '.$tabla_selected.' where '.$primera_columna."::text = '".$id."';");
 			
 			return back()->withInput()->with('registro_eliminado', 'El registro se eliminó correctamente');
 		
@@ -452,7 +452,7 @@ class HomeController extends Controller
 		try
 		{
 		
-			/*$database = $request->database;
+			$database = $request->database;
 			
 			$schema = $request->schema;
 			
@@ -476,11 +476,60 @@ class HomeController extends Controller
 			
 			$tabla_selected = $request->tabla_selected;
 			
-			$primera_columna = $request->primera_columna;
+			$sql="select column_name
+						,is_nullable as required
+						,character_maximum_length as max_char
+						,data_type as type
+						,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
+					from INFORMATION_SCHEMA.columns col 
+				   where table_name = '".$tabla_selected."'
+					 and table_schema = '".$schema."'
+				order by col.ordinal_position";
 			
-			$conexion->delete('delete from '.$tabla_selected.' where '.$primera_columna."::text = '".$id."'");
+			$columnas = $conexion->select($sql);
 			
-			return back()->withInput()->with('registro_eliminado', 'El registro se eliminó correctamente');*/
+			$insert = '';
+			
+			$columnas_registro = '';
+			
+			foreach($columnas as $columna){
+
+				$primera_columna = $columna->column_name;
+				
+				break;
+			
+			}
+			
+			foreach($columnas as $columna){
+				
+				$columna_registro = $columna->column_name;
+				
+				if($request->$columna_registro === NULL){
+					
+					$update = 'NULL';
+					
+				}else{
+				
+					if($columna->type === 'timestamp without time zone'){
+						
+						$timestamp_without_time_zone = date('Y-m-d H:i:s', strtotime($request->$columna_registro));
+						
+						$update = "'".$timestamp_without_time_zone."'";
+						
+					}else{
+					
+						$update = "'".$request->$columna_registro."'";
+						
+					}
+				  
+				}
+				
+				$conexion->update('update '.$tabla_selected.' set '.$columna_registro.' = '.$update.' where ('.$primera_columna.')::text = ('.$id.')::text;');
+				
+			}
+			
+			
+			return back()->withInput()->with('registro_actualizado', 'El registro se actualizó correctamente');
 		
 		}
 		catch (\Exception $e) {

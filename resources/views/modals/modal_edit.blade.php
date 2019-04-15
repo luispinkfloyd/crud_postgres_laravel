@@ -27,7 +27,10 @@ foreach($columnas as $columna){
                     	<?php
 							$nombre_columna = $columna->column_name;
 						?>
-                        @if($columna->type === 'character' | $columna->type === 'character varying' | $columna->type === 'text' | $columna->type === 'char' | $columna->type === 'varchar')
+                        @if($columna->column_name === $primera_columna)
+                        	<label for="{{$columna->column_name}}">{{$columna->column_name}}:</label>
+                            <input type="text" class="form-control" name="{{$columna->column_name}}" value="{{$registro->$nombre_columna}}" readonly>
+                        @elseif($columna->type === 'character' | $columna->type === 'character varying' | $columna->type === 'text' | $columna->type === 'char' | $columna->type === 'varchar')
                         <div class="form-group">
                             <label for="{{$columna->column_name}}">{{$columna->column_name}} 
                             <small>
@@ -94,11 +97,13 @@ foreach($columnas as $columna){
 							}
 							?>
                             </small>:</label>
-                            <input type="datetime-local" class="form-control" name="{{$columna->column_name}}"
+                            
+                            <input type="text" class="form-control" name="{{$columna->column_name}}"
                             <?php
 							if($columna->required === 'NO') echo ' required ';
+							$value = $registro->$nombre_columna;
 							?>
-                            value="{{$registro->$nombre_columna}}">
+                            value="{{$value}}">
                         </div>
                         @endif
                     @endforeach
