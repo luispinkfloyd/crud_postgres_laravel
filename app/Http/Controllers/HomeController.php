@@ -380,9 +380,17 @@ class HomeController extends Controller
 						$insert = $insert."'".$timestamp_without_time_zone."',";
 						
 					}else{
-					
-						$insert = $insert."'".$request->$columna_registro."',";
 						
+						if($charset_def !== 'UTF8'){
+					
+							$insert = $insert."'".utf8_decode($request->$columna_registro)."',";
+							
+						}else{
+							
+							$insert = $insert."'".$request->$columna_registro."',";
+						
+						}
+					
 					}
 				  
 				}
@@ -536,8 +544,16 @@ class HomeController extends Controller
 						$update = "'".$timestamp_without_time_zone."'";
 						
 					}else{
+						
+						if($charset_def !== 'UTF8'){
 					
-						$update = "'".$request->$columna_registro."'";
+							$update = "'".utf8_decode($request->$columna_registro)."'";
+							
+						}else{
+							
+							$update = "'".$request->$columna_registro."'";	
+						
+						}
 						
 					}
 				  
