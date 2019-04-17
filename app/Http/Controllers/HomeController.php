@@ -113,6 +113,14 @@ class HomeController extends Controller
 		
 		$schemas = $conexion->select($sql);
 		
+		$sql_charset = 'SHOW SERVER_ENCODING';
+		
+		$charset_registro = $conexion->select($sql_charset);
+		
+		$charset = $charset_registro[0]->server_encoding;
+		
+		$request->session()->put('charset_def',$charset);
+		
 		return view('home',['database' => $database,'schemas' => $schemas,'db_usuario' => $db_usuario,'db_host' => $db_host]);
 			
     }
@@ -129,13 +137,15 @@ class HomeController extends Controller
 		
 		$db_host = $request->session()->get('db_host');
 		
+		$charset_def = $request->session()->get('charset_def');
+		
 		Config::set('database.connections.pgsql_variable', array(
 			'driver'    => 'pgsql',
 			'host'      => $db_host,
 			'database'  => $database,
 			'username'  => $db_usuario,
 			'password'  => $request->session()->get('db_contrasenia'),
-			'charset'   => 'utf8',
+			'charset'   => $charset_def,
 			'collation' => 'utf8_unicode_ci',
 			'prefix'    => '',
 			'schema'    => $schema,
@@ -164,13 +174,15 @@ class HomeController extends Controller
 		
 		$db_host = $request->session()->get('db_host');
 		
+		$charset_def = $request->session()->get('charset_def');
+		
 		Config::set('database.connections.pgsql_variable', array(
 			'driver'    => 'pgsql',
 			'host'      => $db_host,
 			'database'  => $database,
 			'username'  => $db_usuario,
 			'password'  => $request->session()->get('db_contrasenia'),
-			'charset'   => 'utf8',
+			'charset'   => $charset_def,
 			'collation' => 'utf8_unicode_ci',
 			'prefix'    => '',
 			'schema'    => $schema,
@@ -223,7 +235,7 @@ class HomeController extends Controller
 		
 		$columnas = $conexion->select($sql);
 		
-		return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'tabla_selected' => $tabla_selected,'registros' => $registros,'columnas' => $columnas,'db_usuario' => $db_usuario,'db_host' => $db_host,'comparador1' => $comparador1,'columna_selected1' => $columna_selected1,'where1' => $where1]);
+		return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'tabla_selected' => $tabla_selected,'registros' => $registros,'columnas' => $columnas,'db_usuario' => $db_usuario,'db_host' => $db_host,'comparador1' => $comparador1,'columna_selected1' => $columna_selected1,'where1' => $where1,'charset_def' => $charset_def]);
 		
     }
 	
@@ -239,13 +251,15 @@ class HomeController extends Controller
 		
 		$db_host = $request->session()->get('db_host');
 		
+		$charset_def = $request->session()->get('charset_def');
+		
 		Config::set('database.connections.pgsql_variable', array(
 			'driver'    => 'pgsql',
 			'host'      => $db_host,
 			'database'  => $database,
 			'username'  => $db_usuario,
 			'password'  => $request->session()->get('db_contrasenia'),
-			'charset'   => 'utf8',
+			'charset'   => $charset_def,
 			'collation' => 'utf8_unicode_ci',
 			'prefix'    => '',
 			'schema'    => $schema,
@@ -289,10 +303,10 @@ class HomeController extends Controller
 		$columnas = $conexion->select($sql);
 		
 		$date = date('dmYGis');
-		Excel::create('registros_'.$tabla_selected.'_'.$date, function ($excel) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas) {
+		Excel::create('registros_'.$tabla_selected.'_'.$date, function ($excel) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas,$charset_def) {
 			$excel->setTitle('Registros de '.$tabla_selected);
-			$excel->sheet('Detalle Registros', function ($sheet) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas) {
-				$sheet->loadView('export.export_excel')->with(['db_host' => $db_host,'db_usuario' => $db_usuario,'database' => $database,'tabla_selected' => $tabla_selected,'columna_selected1' => $columna_selected1,'comparador1' => $comparador1,'where1' => $where1,'registros' => $registros,'columnas' => $columnas]);;
+			$excel->sheet('Detalle Registros', function ($sheet) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas,$charset_def) {
+				$sheet->loadView('export.export_excel')->with(['db_host' => $db_host,'db_usuario' => $db_usuario,'database' => $database,'tabla_selected' => $tabla_selected,'columna_selected1' => $columna_selected1,'comparador1' => $comparador1,'where1' => $where1,'registros' => $registros,'columnas' => $columnas,'charset_def' => $charset_def]);;
 			})->download('xls');
 		return back();
 		});
@@ -313,13 +327,15 @@ class HomeController extends Controller
 			
 			$db_host = $request->session()->get('db_host');
 			
+			$charset_def = $request->session()->get('charset_def');
+			
 			Config::set('database.connections.pgsql_variable', array(
 				'driver'    => 'pgsql',
 				'host'      => $db_host,
 				'database'  => $database,
 				'username'  => $db_usuario,
 				'password'  => $request->session()->get('db_contrasenia'),
-				'charset'   => 'utf8',
+				'charset'   => $charset_def,
 				'collation' => 'utf8_unicode_ci',
 				'prefix'    => '',
 				'schema'    => $schema,
@@ -387,7 +403,6 @@ class HomeController extends Controller
 			
 			$conexion->insert('insert into '.$tabla_selected.' ('.$columnas_registro.') values ('.$insert.');');
 			
-			
 			return back()->withInput()->with('registro_agregado', 'El registro se agregó correctamente');
 		}
 		catch (\Exception $e) {
@@ -414,13 +429,15 @@ class HomeController extends Controller
 			
 			$db_host = $request->session()->get('db_host');
 			
+			$charset_def = $request->session()->get('charset_def');
+			
 			Config::set('database.connections.pgsql_variable', array(
 				'driver'    => 'pgsql',
 				'host'      => $db_host,
 				'database'  => $database,
 				'username'  => $db_usuario,
 				'password'  => $request->session()->get('db_contrasenia'),
-				'charset'   => 'utf8',
+				'charset'   => $charset_def,
 				'collation' => 'utf8_unicode_ci',
 				'prefix'    => '',
 				'schema'    => $schema,
@@ -460,13 +477,15 @@ class HomeController extends Controller
 			
 			$db_host = $request->session()->get('db_host');
 			
+			$charset_def = $request->session()->get('charset_def');
+			
 			Config::set('database.connections.pgsql_variable', array(
 				'driver'    => 'pgsql',
 				'host'      => $db_host,
 				'database'  => $database,
 				'username'  => $db_usuario,
 				'password'  => $request->session()->get('db_contrasenia'),
-				'charset'   => 'utf8',
+				'charset'   => $charset_def,
 				'collation' => 'utf8_unicode_ci',
 				'prefix'    => '',
 				'schema'    => $schema,

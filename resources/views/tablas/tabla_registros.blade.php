@@ -160,10 +160,15 @@
                               $columna_registro = $columna->column_name;
                           ?>
                           
+                          	  @if($charset_def !== 'UTF8')
                           
-                          
-                              <td>{{$registro->$columna_registro}}</td>
+                              	<td>{{utf8_encode($registro->$columna_registro)}}</td>
                               
+                              @else
+                              
+                              	<td>{{$registro->$columna_registro}}</td>
+                              
+                              @endif
                                
                       @endforeach
                   </tr>

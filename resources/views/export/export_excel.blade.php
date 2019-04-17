@@ -58,7 +58,15 @@ tr > td {
                       
                       
                       
-                          <td>{{$registro->$columna_registro}}</td>
+                          @if($charset_def !== 'UTF8')
+                          
+                            <td>{{utf8_encode($registro->$columna_registro)}}</td>
+                          
+                          @else
+                          
+                            <td>{{$registro->$columna_registro}}</td>
+                          
+                          @endif
                           
                            
                   @endforeach
