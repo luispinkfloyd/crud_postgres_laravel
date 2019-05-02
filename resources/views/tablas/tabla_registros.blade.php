@@ -174,7 +174,7 @@
                   </tr>
             @empty
 				<?php
-                    $count_columnas = count($columnas);
+                    $count_columnas = count($columnas)+1;
                 ?>
                 	<td colspan="{{$count_columnas}}" class="alert-danger" align="center"><h3><b>Sin registros</b></h3></td>
             @endforelse
