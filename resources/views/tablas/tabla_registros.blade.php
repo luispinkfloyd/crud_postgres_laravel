@@ -117,6 +117,7 @@
         </div><br />
     @endif
 </div>
+<div class="container" align="center"><p><h2><b>Nombre de tabla: {{$tabla_selected}}</b></h2></p></div>
 <div class="table-responsive tabla-resultados borde">
     <a href="#addModal" class="btn btn-primary" data-toggle="modal" style="margin:2px;"><span>Añadir Registro</span></a>
     <form method="get" action="{{ route('export_excel') }}" style="display:inline-block">

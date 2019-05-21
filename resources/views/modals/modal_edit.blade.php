@@ -30,7 +30,7 @@ foreach($columnas as $columna){
                         @if($columna->column_name === $primera_columna)
                         	<label for="{{$columna->column_name}}">{{$columna->column_name}}:</label>
                             <input type="text" class="form-control" name="{{$columna->column_name}}" value="{{$registro->$nombre_columna}}" readonly>
-                        @elseif($columna->type === 'character' | $columna->type === 'character varying' | $columna->type === 'text' | $columna->type === 'char' | $columna->type === 'varchar')
+                        @elseif($columna->type === 'character' | $columna->type === 'character varying' | $columna->type === 'text' | $columna->type === 'char' | $columna->type === 'varchar'  | $columna->type === 'boolean')
                         <div class="form-group">
                             <label for="{{$columna->column_name}}">{{$columna->column_name}} 
                             <small>
