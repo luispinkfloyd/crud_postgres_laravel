@@ -58,16 +58,21 @@ tr > td {
                       
                       
                       
-                          <td>{{$registro->$columna_registro}}</td>
+                          @if($charset_def !== 'UTF8')
+                          
+                            <td>{{utf8_encode($registro->$columna_registro)}}</td>
+                          
+                          @else
+                          
+                            <td>{{$registro->$columna_registro}}</td>
+                          
+                          @endif
                           
                            
                   @endforeach
               </tr>
         @empty
-        	<?php
-				$count_columnas = count($columnas);
-			?>
-                <td colspan="{{$count_columnas}}" align="center"><h3><b>Sin registros</b></h3></td>
+        
         @endforelse      
     </tbody>
 </table>

@@ -126,6 +126,7 @@
         </div>
     @endif
 </div>
+<div class="container" align="center"><p><h2><b>Nombre de tabla: {{$tabla_selected}}</b></h2></p></div>
 <div class="table-responsive tabla-resultados borde">
     <a href="#addModal" class="btn btn-primary" data-toggle="modal" style="margin:2px;"><span>Añadir Registro</span></a>
     <form method="get" action="{{ route('export_excel') }}" style="display:inline-block">
@@ -169,16 +170,21 @@
                               $columna_registro = $columna->column_name;
                           ?>
                           
+                          	  @if($charset_def !== 'UTF8')
                           
-                          
-                              <td>{{$registro->$columna_registro}}</td>
+                              	<td>{{utf8_encode($registro->$columna_registro)}}</td>
                               
+                              @else
+                              
+                              	<td>{{$registro->$columna_registro}}</td>
+                              
+                              @endif
                                
                       @endforeach
                   </tr>
             @empty
 				<?php
-                    $count_columnas = count($columnas);
+                    $count_columnas = count($columnas)+1;
                 ?>
                 	<td colspan="{{$count_columnas}}" class="alert-danger" align="center"><h3><b>Sin registros</b></h3></td>
             @endforelse
