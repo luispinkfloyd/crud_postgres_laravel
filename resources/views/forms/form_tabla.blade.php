@@ -27,12 +27,12 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="tablas_span">Tablas</span>
                 </div>
-                <select class="custom-select" name="tabla_selected" onChange="this.form.submit();" required>
-                    <option disabled selected value>--Seleccione--</option>
+                	<input type="text" autocomplete="off" name="tabla_selected" list="list_tablas" class="form-control" onChange="this.form.submit();" required <?php if(isset($tabla_selected)) echo 'value="'.$tabla_selected.'"'; ?>>
+                <datalist id="list_tablas">
                     @foreach($tablas as $tabla)
-                        <option <?php if(isset($tabla_selected)){ if($tabla->table_name === $tabla_selected){ echo 'selected'; } } ?>>{{$tabla->table_name}}</option>
+                        <option>{{$tabla->table_name}}</option>
                     @endforeach
-                </select>
+                </datalist>
             </div>
         </div>
     </div>

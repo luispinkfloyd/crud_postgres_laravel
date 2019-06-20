@@ -92,159 +92,200 @@ class HomeController extends Controller
 	
 	public function database(Request $request)
     {
-        $database = $request->database;
+        
+		if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
 		
-		$db_usuario = $request->session()->get('db_usuario');
+			$database = $request->database;
+			
+			$db_usuario = $request->session()->get('db_usuario');
+			
+			$db_host = $request->session()->get('db_host');
+			
+			Config::set('database.connections.pgsql_variable', array(
+				'driver'    => 'pgsql',
+				'host'      => $db_host,
+				'database'  => $database,
+				'username'  => $db_usuario,
+				'password'  => $request->session()->get('db_contrasenia'),
+				'charset'   => 'utf8',
+				'collation' => 'utf8_unicode_ci',
+				'prefix'    => '',
+				'schema'    => 'public',
+			));
+			
+			
+			$conexion = DB::connection('pgsql_variable');
+			
+			$sql="select schema_name
+						from information_schema.schemata
+					   where not schema_name ilike 'pg%'
+						 and schema_name <> 'information_schema'
+						 and catalog_name = '".$database."'
+					order by schema_name;";
+			
+			$schemas = $conexion->select($sql);
+			
+			$sql_charset = 'SHOW SERVER_ENCODING';
+			
+			$charset_registro = $conexion->select($sql_charset);
+			
+			$charset = $charset_registro[0]->server_encoding;
+			
+			$request->session()->put('charset_def',$charset);
+			
+			return view('home',['database' => $database,'schemas' => $schemas,'db_usuario' => $db_usuario,'db_host' => $db_host]);
 		
-		$db_host = $request->session()->get('db_host');
-		
-		Config::set('database.connections.pgsql_variable', array(
-			'driver'    => 'pgsql',
-			'host'      => $db_host,
-			'database'  => $database,
-			'username'  => $db_usuario,
-			'password'  => $request->session()->get('db_contrasenia'),
-			'charset'   => 'utf8',
-			'collation' => 'utf8_unicode_ci',
-			'prefix'    => '',
-			'schema'    => 'public',
-		));
-		
-		
-		$conexion = DB::connection('pgsql_variable');
-		
-		$sql="select schema_name
-					from information_schema.schemata
-				   where not schema_name ilike 'pg%'
-					 and schema_name <> 'information_schema'
-					 and catalog_name = '".$database."'
-				order by schema_name;";
-		
-		$schemas = $conexion->select($sql);
-		
-		$sql_charset = 'SHOW SERVER_ENCODING';
-		
-		$charset_registro = $conexion->select($sql_charset);
-		
-		$charset = $charset_registro[0]->server_encoding;
-		
-		$request->session()->put('charset_def',$charset);
-		
-		return view('home',['database' => $database,'schemas' => $schemas,'db_usuario' => $db_usuario,'db_host' => $db_host]);
+		}else{
+			
+			return redirect('home');
+			
+		}		
 			
     }
 	
 	public function schema(Request $request)
     {
         
+		if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
+				
+			$database = $request->database;
 			
-		$database = $request->database;
-		
-		$schema = $request->schema;
-		
-		$db_usuario = $request->session()->get('db_usuario');
-		
-		$db_host = $request->session()->get('db_host');
-		
-		$charset_def = $request->session()->get('charset_def');
-		
-		Config::set('database.connections.pgsql_variable', array(
-			'driver'    => 'pgsql',
-			'host'      => $db_host,
-			'database'  => $database,
-			'username'  => $db_usuario,
-			'password'  => $request->session()->get('db_contrasenia'),
-			'charset'   => $charset_def,
-			'collation' => 'utf8_unicode_ci',
-			'prefix'    => '',
-			'schema'    => $schema,
-		));
+			$schema = $request->schema;
 			
-		$conexion = DB::connection('pgsql_variable');
+			$db_usuario = $request->session()->get('db_usuario');
+			
+			$db_host = $request->session()->get('db_host');
+			
+			$charset_def = $request->session()->get('charset_def');
+			
+			Config::set('database.connections.pgsql_variable', array(
+				'driver'    => 'pgsql',
+				'host'      => $db_host,
+				'database'  => $database,
+				'username'  => $db_usuario,
+				'password'  => $request->session()->get('db_contrasenia'),
+				'charset'   => $charset_def,
+				'collation' => 'utf8_unicode_ci',
+				'prefix'    => '',
+				'schema'    => $schema,
+			));
+				
+			$conexion = DB::connection('pgsql_variable');
+			
+			$sql="select table_name
+							from information_schema.tables 
+						   where table_schema = '".$schema."'
+						order by table_name;";
+			
+			$tablas = $conexion->select($sql);
+			
+			return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'db_usuario' => $db_usuario,'db_host' => $db_host]);
+			
+		}else{
+			
+			return redirect('home');
+			
+		}
 		
-		$sql="select table_name
-						from information_schema.tables 
-					   where table_schema = '".$schema."'
-					order by table_name;";
-		
-		$tablas = $conexion->select($sql);
-		
-		return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'db_usuario' => $db_usuario,'db_host' => $db_host]);
     }
 	
 	public function tabla(Request $request)
     {
 		
-		$database = $request->database;
+		try
+		{
 		
-		$schema = $request->schema;
-		
-		$db_usuario = $request->session()->get('db_usuario');
-		
-		$db_host = $request->session()->get('db_host');
-		
-		$charset_def = $request->session()->get('charset_def');
-		
-		Config::set('database.connections.pgsql_variable', array(
-			'driver'    => 'pgsql',
-			'host'      => $db_host,
-			'database'  => $database,
-			'username'  => $db_usuario,
-			'password'  => $request->session()->get('db_contrasenia'),
-			'charset'   => $charset_def,
-			'collation' => 'utf8_unicode_ci',
-			'prefix'    => '',
-			'schema'    => $schema,
-		));
-		
-		$conexion = DB::connection('pgsql_variable');
-		
-		$sql="select table_name
-						from information_schema.tables 
-					   where table_schema = '".$schema."'
-					order by table_name;";
-		
-		$tablas = $conexion->select($sql);
-		
-		$tabla_selected = $request->tabla_selected;
-		
-		$registros = $conexion->table($tabla_selected);
-		
-		$comparador1 = NULL;
+			if($request->tabla_selected === NULL){ return back()->withInput();}
 			
-		$columna_selected1 = NULL;
-		
-		$where1 = NULL;
-		
-		if(isset($request->where1)){
+			if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
 			
-			$comparador1 = $request->comparador1;
-			
-			$columna_selected1 = $request->columna_selected1;
-			
-			$where1 = $request->where1;
-			
-			if($comparador1 === 'ilike'){
-				$registros = $registros->whereRaw("$columna_selected1::text ilike '%".$where1."%'");
+				$database = $request->database;
+				
+				$schema = $request->schema;
+				
+				$db_usuario = $request->session()->get('db_usuario');
+				
+				$db_host = $request->session()->get('db_host');
+				
+				$charset_def = $request->session()->get('charset_def');
+				
+				Config::set('database.connections.pgsql_variable', array(
+					'driver'    => 'pgsql',
+					'host'      => $db_host,
+					'database'  => $database,
+					'username'  => $db_usuario,
+					'password'  => $request->session()->get('db_contrasenia'),
+					'charset'   => $charset_def,
+					'collation' => 'utf8_unicode_ci',
+					'prefix'    => '',
+					'schema'    => $schema,
+				));
+				
+				$conexion = DB::connection('pgsql_variable');
+				
+				$sql="select table_name
+								from information_schema.tables 
+							   where table_schema = '".$schema."'
+							order by table_name;";
+				
+				$tablas = $conexion->select($sql);
+				
+				$tabla_selected = $request->tabla_selected;
+				
+				$registros = $conexion->table($tabla_selected);
+				
+				$comparador1 = NULL;
+					
+				$columna_selected1 = NULL;
+				
+				$where1 = NULL;
+				
+				if(isset($request->where1)){
+					
+					$comparador1 = $request->comparador1;
+					
+					$columna_selected1 = $request->columna_selected1;
+					
+					$where1 = $request->where1;
+					
+					if($comparador1 === 'ilike'){
+						$registros = $registros->whereRaw("$columna_selected1::text ilike '%".$where1."%'");
+					}else{
+						$registros = $registros->where($columna_selected1,$comparador1,$where1);
+					}
+				}
+				
+				$count_registros = count($registros->orderBy(DB::raw(' 1 '))->get());
+				
+				$registros = $registros->orderBy(DB::raw(' 1 '))->paginate(8);
+				
+				$sql="select column_name
+							,is_nullable as required
+							,character_maximum_length as max_char
+							,data_type as type
+							,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
+						from INFORMATION_SCHEMA.columns col 
+					   where table_name = '".$tabla_selected."'
+						 and table_schema = '".$schema."'
+					order by col.ordinal_position";
+				
+				$columnas = $conexion->select($sql);
+				
+				return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'tabla_selected' => $tabla_selected,'registros' => $registros,'columnas' => $columnas,'db_usuario' => $db_usuario,'db_host' => $db_host,'comparador1' => $comparador1,'columna_selected1' => $columna_selected1,'where1' => $where1,'charset_def' => $charset_def,'count_registros' => $count_registros]);
+				
 			}else{
-				$registros = $registros->where($columna_selected1,$comparador1,$where1);
+				
+				return redirect('home');
+				
 			}
+		
+		}catch (\Exception $e) {
+			
+			$mensaje_error = $e->getMessage();
+			
+			return back()->withInput()->with('mensaje_error',$mensaje_error);
+			
 		}
-		$registros = $registros->orderBy(DB::raw(' 1 '))->paginate(8);
-		
-		$sql="select column_name
-					,is_nullable as required
-					,character_maximum_length as max_char
-					,data_type as type
-		            ,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
-			    from INFORMATION_SCHEMA.columns col 
-			   where table_name = '".$tabla_selected."'
-				 and table_schema = '".$schema."'
-			order by col.ordinal_position";
-		
-		$columnas = $conexion->select($sql);
-		
-		return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'tabla_selected' => $tabla_selected,'registros' => $registros,'columnas' => $columnas,'db_usuario' => $db_usuario,'db_host' => $db_host,'comparador1' => $comparador1,'columna_selected1' => $columna_selected1,'where1' => $where1,'charset_def' => $charset_def]);
 		
     }
 	
@@ -575,8 +616,11 @@ class HomeController extends Controller
 				$conexion->delete('delete from '.$tabla_selected.' where '.$primera_columna."::text = '".$id."';");
 				
 				return back()->withInput()->with('registro_eliminado', 'El registro se eliminó correctamente');
+				
 			}else{
-				return back()->withInput()->with('registro_no_modificado', 'No se puede borrar el registro de '.$tabla_selected.' porque hay valores repetidos en la columna '.$primera_columna.' usada como primary key.');
+				
+				return back()->withInput()->with('registro_no_modificado', 'No se puede borrar el registro de '.$tabla_selected.' porque hay valores repetidos en la columna '.$primera_columna.' usada como primary key por la aplicación.');
+				
 			}
 		
 		}
@@ -680,7 +724,15 @@ class HomeController extends Controller
 								
 							}else{
 							
-								$update = "'".$request->$columna_registro."'";
+								if($charset_def !== 'UTF8'){
+					
+									$update = "'".utf8_decode($request->$columna_registro)."'";
+									
+								}else{
+									
+									$update = "'".$request->$columna_registro."'";	
+								
+								}
 								
 							}
 						  
@@ -695,18 +747,6 @@ class HomeController extends Controller
 						//print_r($select_columna[0]->$columna_registro); exit;
 						
 						$select_columna = $select_columna[0]->$columna_registro;
-						
-					}else{
-						
-						if($charset_def !== 'UTF8'){
-					
-							$update = "'".utf8_decode($request->$columna_registro)."'";
-							
-						}else{
-							
-							$update = "'".$request->$columna_registro."'";	
-						
-						}
 						
 						//echo $update; exit;
 						
@@ -736,7 +776,7 @@ class HomeController extends Controller
 					
 				}
 			}else{
-				return back()->withInput()->with('registro_no_modificado', 'No se puede modificar '.$tabla_selected.' porque hay valores repetidos en la columna '.$primera_columna.' usada como primary key.');
+				return back()->withInput()->with('registro_no_modificado', 'No se puede modificar '.$tabla_selected.' porque hay valores repetidos en la columna '.$primera_columna.' usada como primary key por la aplicación.');
 			}
 		
 		}
