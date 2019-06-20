@@ -432,9 +432,24 @@ class HomeController extends Controller
 			
 			$primera_columna = $request->primera_columna;
 			
-			$conexion->delete('delete from '.$tabla_selected.' where '.$primera_columna."::text = '".$id."';");
+			$sql_valores_repetidos_primera_columna = "SELECT $primera_columna
+												  FROM $tabla_selected
+												  GROUP BY $primera_columna
+												  HAVING (COUNT($primera_columna) > 1)";
+												  
 			
-			return back()->withInput()->with('registro_eliminado', 'El registro se eliminó correctamente');
+			$valores_repetidos_primera_columna = $conexion->select($sql_valores_repetidos_primera_columna);
+			
+			//print_r($valores_repetidos_primera_columna); exit;
+			
+			if(count($valores_repetidos_primera_columna) === 0){
+			
+				$conexion->delete('delete from '.$tabla_selected.' where '.$primera_columna."::text = '".$id."';");
+				
+				return back()->withInput()->with('registro_eliminado', 'El registro se eliminó correctamente');
+			}else{
+				return back()->withInput()->with('registro_no_modificado', 'No se puede borrar el registro de '.$tabla_selected.' porque hay valores repetidos en la columna '.$primera_columna.' usada como primary key.');
+			}
 		
 		}
 		catch (\Exception $e) {
@@ -500,36 +515,87 @@ class HomeController extends Controller
 			
 			}
 			
-			foreach($columnas as $columna){
+			$sql_valores_repetidos_primera_columna = "SELECT $primera_columna
+												  FROM $tabla_selected
+												  GROUP BY $primera_columna
+												  HAVING (COUNT($primera_columna) > 1)";
+												  
+			
+			$valores_repetidos_primera_columna = $conexion->select($sql_valores_repetidos_primera_columna);
+			
+			//print_r($valores_repetidos_primera_columna); exit;
+			
+			if(count($valores_repetidos_primera_columna) === 0){
+			
+				$count_modificaciones = 0;
 				
-				$columna_registro = $columna->column_name;
 				
-				if($request->$columna_registro === NULL){
+				foreach($columnas as $columna){
 					
-					$update = 'NULL';
+					$columna_registro = $columna->column_name;
+					
+					if($columna_registro != $primera_columna){
+						
+						if($request->$columna_registro === NULL){
+							
+							$update = 'NULL';
+							
+						}else{
+						
+							if($columna->type === 'timestamp without time zone'){
+								
+								$timestamp_without_time_zone = date('Y-m-d H:i:s', strtotime($request->$columna_registro));
+								
+								$update = "'".$timestamp_without_time_zone."'";
+								
+							}else{
+							
+								$update = "'".$request->$columna_registro."'";
+								
+							}
+						  
+						}
+						
+						$sql_select_columna = "select $columna_registro::text as $columna_registro from $tabla_selected where ($primera_columna)::text = ($id)::text";
+						
+						$select_columna = $conexion->select($sql_select_columna);
+						
+						//$select_columna = NULL;
+						
+						//print_r($select_columna[0]->$columna_registro); exit;
+						
+						$select_columna = $select_columna[0]->$columna_registro;
+						
+						//echo $update; exit;
+						
+						if( $select_columna !== $request->$columna_registro){
+							
+							//echo $select_columna; exit;
+							
+							$conexion->update('update '.$tabla_selected.' set '.$columna_registro.' = '.$update.' where ('.$primera_columna.')::text = ('.$id.')::text;');
+							
+							$count_modificaciones++;
+							
+						}
+					
+					}
+					
+				}
+				
+				//echo $count_modificaciones; exit;
+				
+				if($count_modificaciones === 0){
+					
+					return back()->withInput()->with('registro_no_modificado', 'Nada fue modificado.');
 					
 				}else{
 				
-					if($columna->type === 'timestamp without time zone'){
-						
-						$timestamp_without_time_zone = date('Y-m-d H:i:s', strtotime($request->$columna_registro));
-						
-						$update = "'".$timestamp_without_time_zone."'";
-						
-					}else{
+					return back()->withInput()->with('registro_actualizado', 'El registro se actualizó correctamente (campos modificados = '.$count_modificaciones.').');
 					
-						$update = "'".$request->$columna_registro."'";
-						
-					}
-				  
 				}
-				
-				$conexion->update('update '.$tabla_selected.' set '.$columna_registro.' = '.$update.' where ('.$primera_columna.')::text = ('.$id.')::text;');
-				
+			}else{
+				return back()->withInput()->with('registro_no_modificado', 'No se puede modificar '.$tabla_selected.' porque hay valores repetidos en la columna '.$primera_columna.' usada como primary key.');
 			}
-			
-			
-			return back()->withInput()->with('registro_actualizado', 'El registro se actualizó correctamente');
 		
 		}
 		catch (\Exception $e) {

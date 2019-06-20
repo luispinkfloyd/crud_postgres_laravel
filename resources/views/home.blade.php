@@ -37,7 +37,7 @@
 		text-align:right;
 	}
 	.borde{
-		border:#555555 solid 1px;
+		border:#888888 solid 1px;
 	}
 </style>
 @endsection

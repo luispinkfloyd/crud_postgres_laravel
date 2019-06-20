@@ -47,13 +47,13 @@
 </style>
 
 @endsection
-
 <form class="form-general" action="{{ route('where1') }}" method="get">
     <input type="hidden" name="database" value="{{$database}}">
     <input type="hidden" name="schema" value="{{$schema}}">
     <input type="hidden" name="tabla_selected" value="{{$tabla_selected}}">
     <div class="row form-select-row">
-        <div class="col-sm-4 form-group">
+    
+        <div class="col-sm-3 form-group">
             <div class="input-group">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="columna_span">Columna</span>
@@ -88,33 +88,42 @@
                 <input type="text" name="where1" class="form-control" placeholder="Parámetro de búsqueda..." required <?php if(isset($where1)) echo 'value="'.$where1.'"';?>>
             </div>
         </div>
-        <div class="col-sm-1 form-group">
-        	<button type="submit" class="btn btn-primary">Buscar</button>
+        <div class="col-sm-2 form-group">
+        	<button type="submit" class="btn btn-primary">Buscar</button>&nbsp;
+            <?php echo '<input type="button" class="btn btn-danger" value="Limpiar" onclick="javascript:location.href='."'tabla?database=".$database."&schema=".$schema."&tabla_selected=".$tabla_selected."';".'"/>';
+			?> 
         </div>
     </div>
  </form>
- <div class="container" style="max-width:400px;margin:5px auto 0px auto;">
+ <div class="container" style="max-width:600px">
     @if(session()->get('registro_agregado'))
         <div class="alert alert-success" style="text-align:center">
-            {{ session()->get('registro_agregado') }}
+            <b>{{ session()->get('registro_agregado') }}</b>
             &nbsp;
             &nbsp;
             <input type="button" class="btn btn-sm btn-success" value="x" onclick="javascript:window.location.reload();"/>
-        </div><br />
+        </div>
     @elseif(session()->get('registro_actualizado'))
         <div class="alert alert-success" style="text-align:center">
-            {{ session()->get('registro_actualizado') }}
+            <b>{{ session()->get('registro_actualizado') }}</b>
             &nbsp;
             &nbsp;
             <input type="button" class="btn btn-sm btn-success" value="x" onclick="javascript:window.location.reload();"/>
-        </div><br />
+        </div>
     @elseif(session()->get('registro_eliminado'))
         <div class="alert alert-success" style="text-align:center">
-            {{ session()->get('registro_eliminado') }}
+            <b>{{ session()->get('registro_eliminado') }}</b>
             &nbsp;
             &nbsp;
             <input type="button" class="btn btn-sm btn-success" value="x" onclick="javascript:window.location.reload();"/>
-        </div><br />
+        </div>
+    @elseif(session()->get('registro_no_modificado'))
+        <div class="alert alert-warning" style="text-align:center">
+            <b>{{ session()->get('registro_no_modificado') }}</b>
+            &nbsp;
+            &nbsp;
+            <input type="button" class="btn btn-sm btn-warning" value="x" onclick="javascript:window.location.reload();"/>
+        </div>
     @endif
 </div>
 <div class="table-responsive tabla-resultados borde">
