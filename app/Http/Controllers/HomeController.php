@@ -330,37 +330,37 @@ class HomeController extends Controller
 			
 			$date = date('dmYGis');
 			
-			/*Excel::create('registros_'.$tabla_selected.'_'.$date, function ($excel) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas,$charset_def) {
+			Excel::create('registros_'.$tabla_selected.'_'.$date, function ($excel) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas,$charset_def) {
 				$excel->setTitle('Registros de '.$tabla_selected);
 				$excel->sheet('Detalle Registros', function ($sheet) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas,$charset_def) {
 					$sheet->loadView('export.export_excel')->with(['db_host' => $db_host,'db_usuario' => $db_usuario,'database' => $database,'tabla_selected' => $tabla_selected,'columna_selected1' => $columna_selected1,'comparador1' => $comparador1,'where1' => $where1,'registros' => $registros,'columnas' => $columnas,'charset_def' => $charset_def]);;
 				})->download('xls');
 			return back();
-			});*/
+			});
 			
 			//$singleRow = $this->object_to_array($columnas);
 			
-			$columna_array = array();
+			/*$columna_array = array();
 			
 			foreach($columnas as $columna){
 				$columnas_array[] = $columna->column_name.' ('.$columna->data_type.')';
-			}
+			}*/
 			
 			/*print_r($columnas_array);
 			
 			exit;*/
 			
-			foreach($registros as $registro){
+			/*foreach($registros as $registro){
 				
 				$registros_array[] = (array)$registro;
 				
-			}
+			}*/
 			
 			/*print_r($registros_array);
 			
 			exit;*/
 			
-			$border = (new BorderBuilder())
+			/*$border = (new BorderBuilder())
 							  ->setBorderBottom(Color::BLACK, Border::WIDTH_THIN, Border::STYLE_SOLID)
 							  ->setBorderRight(Color::BLACK, Border::WIDTH_THIN, Border::STYLE_SOLID)
 							  ->build();
@@ -381,25 +381,25 @@ class HomeController extends Controller
 								   ->setShouldWrapText(true)
 								   ->setBackgroundColor(Color::WHITE)
 								   ->setBorder($border)
-								   ->build();
+								   ->build();*/
 			
-			$writer = WriterFactory::create(Type::XLSX); // for XLSX files
+			//$writer = WriterFactory::create(Type::XLSX); // for XLSX files
 			//$writer = WriterFactory::create(Type::CSV); // for CSV files
 			//$writer = WriterFactory::create(Type::ODS); // for ODS files
 			
-			$fileName = 'registros_'.$tabla_selected.'_'.$date.'.xlsx';
+			//$fileName = 'registros_'.$tabla_selected.'_'.$date.'.xlsx';
 			
 			//$writer->openToFile($filePath); // write data to a file or to a PHP stream
-			$writer->openToBrowser($fileName); // stream data directly to the browser
+			//$writer->openToBrowser($fileName); // stream data directly to the browser
 			
 			//$columnas_array = ['columna1','columna2'];
 			
-			$writer->addRowWithStyle($columnas_array,$style_primera_linea); // add a row at a time
+			/*$writer->addRowWithStyle($columnas_array,$style_primera_linea); // add a row at a time
 			
 			
 			$writer->addRowsWithStyle($registros_array,$style_resto_filas); // add multiple rows at a time
 			
-			$writer->close();
+			$writer->close();*/
 			
 			//return back();
 			
