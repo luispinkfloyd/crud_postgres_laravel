@@ -47,85 +47,8 @@
 </style>
 
 @endsection
-<form class="form-general" action="{{ route('tabla') }}" method="get">
-    <input type="hidden" name="database" value="{{$database}}">
-    <input type="hidden" name="schema" value="{{$schema}}">
-    <input type="hidden" name="tabla_selected" value="{{$tabla_selected}}">
-    <div class="row form-select-row">
-    
-        <div class="col-sm-3 form-group">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="columna_span">Columna</span>
-                </div>
-                <select class="custom-select" name="columna_selected1" required>
-                    <option disabled selected value>--Seleccione--</option>
-                    @foreach($columnas as $columna)
-                        <option <?php if(isset($columna_selected1)) if($columna_selected1 === $columna->column_name) echo 'selected';?>>{{$columna->column_name}}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-        <div class="col-sm-3 form-group">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="comparador_span">Comparador</span>
-                </div>
-                <select class="custom-select" name="comparador1" required>
-                	<option disabled selected value>--Seleccione--</option>
-                    <option value="=" <?php if(isset($comparador1)) if($comparador1 === '=') echo 'selected';?>>Igual</option>
-                    <option value="ilike" <?php if(isset($comparador1)) if($comparador1 === 'ilike') echo 'selected';?>>Contiene</option>
-                    <option value=">=" <?php if(isset($comparador1)) if($comparador1 === '>=') echo 'selected';?>>Mayor o Igual</option>
-                    <option value="<=" <?php if(isset($comparador1)) if($comparador1 === '<=') echo 'selected';?>>Menor o Igual</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-sm-4 form-group">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="where1_span">Parámetro</span>
-                </div>
-                <input type="text" name="where1" class="form-control" placeholder="Parámetro de búsqueda..." required <?php if(isset($where1)) echo 'value="'.$where1.'"';?>>
-            </div>
-        </div>
-        <div class="col-sm-2 form-group">
-        	<button type="submit" class="btn btn-primary">Buscar</button>&nbsp;
-            <?php echo '<input type="button" class="btn btn-danger" value="Limpiar" onclick="javascript:location.href='."'tabla?database=".$database."&schema=".$schema."&tabla_selected=".$tabla_selected."';".'"/>';
-			?> 
-        </div>
-    </div>
- </form>
- <div class="container" style="max-width:600px">
-    @if(session()->get('registro_agregado'))
-        <div class="alert alert-success" style="text-align:center">
-            <b>{{ session()->get('registro_agregado') }}</b>
-            &nbsp;
-            &nbsp;
-            <input type="button" class="btn btn-sm btn-success" value="x" onclick="javascript:window.location.reload();"/>
-        </div>
-    @elseif(session()->get('registro_actualizado'))
-        <div class="alert alert-success" style="text-align:center">
-            <b>{{ session()->get('registro_actualizado') }}</b>
-            &nbsp;
-            &nbsp;
-            <input type="button" class="btn btn-sm btn-success" value="x" onclick="javascript:window.location.reload();"/>
-        </div>
-    @elseif(session()->get('registro_eliminado'))
-        <div class="alert alert-success" style="text-align:center">
-            <b>{{ session()->get('registro_eliminado') }}</b>
-            &nbsp;
-            &nbsp;
-            <input type="button" class="btn btn-sm btn-success" value="x" onclick="javascript:window.location.reload();"/>
-        </div>
-    @elseif(session()->get('registro_no_modificado'))
-        <div class="alert alert-warning" style="text-align:center">
-            <b>{{ session()->get('registro_no_modificado') }}</b>
-            &nbsp;
-            &nbsp;
-            <input type="button" class="btn btn-sm btn-warning" value="x" onclick="javascript:window.location.reload();"/>
-        </div>
-    @endif
-</div>
+@include('forms.form_busqueda')
+@include('tablas.alerts_table')
 <div class="table-responsive tabla-resultados borde">
     <div class="row">
     	<div class="col" align="right">
@@ -163,25 +86,42 @@
             <th scope="col"></th>
             @foreach($columnas as $columna)
                 <th scope="col">{{$columna->column_name}}
-                <form method="get" action="{{route('tabla')}}" style="display:inline-block">
-                	<input type="hidden" name="ordercol" value="{{$ordercol++}}">
-                    <input type="hidden" name="database" value="{{$database}}">
-                    <input type="hidden" name="schema" value="{{$schema}}">
-                    <input type="hidden" name="tabla_selected" value="{{$tabla_selected}}">
-                    @if(isset($where1))
-                        <input type="hidden" name="columna_selected1" value="{{$columna_selected1}}">
-                        <input type="hidden" name="comparador1" value="{{$comparador1}}">
-                        <input type="hidden" name="where1" value="{{$where1}}">
-                    @endif
-                    @if($sort === 'asc')
-                    	<input type="hidden" name="sort" value="desc">
-                    @elseif($sort === 'desc')
-                    	<input type="hidden" name="sort" value="asc">
-                    @endif
-                    <button type="submit" class="btn btn-sm btn-info">
-                    	<i class="material-icons" style="font-size:9px;padding:-2px"><b>import_export</b></i>
-                    </button>
-                    </form><br><small>{{$columna->data_type}}</small></th>
+                    <form method="get" action="{{route('tabla')}}" style="display:inline-block">
+                        <input type="hidden" name="ordercol" value="{{$ordercol}}">
+                        <input type="hidden" name="database" value="{{$database}}">
+                        <input type="hidden" name="schema" value="{{$schema}}">
+                        <input type="hidden" name="tabla_selected" value="{{$tabla_selected}}">
+                        @if(isset($where1))
+                            <input type="hidden" name="columna_selected1" value="{{$columna_selected1}}">
+                            <input type="hidden" name="comparador1" value="{{$comparador1}}">
+                            <input type="hidden" name="where1" value="{{$where1}}">
+                        @endif
+                        <input type="hidden" name="sort" value="asc">
+                        <button type="submit" class="btn btn-sm btn-info">
+                            <i class="material-icons" style="font-size:9px;padding:-2px"><b>import_export</b></i>
+                            <span><small>Asc</small></span>
+                        </button>
+                    </form>
+                    <form method="get" action="{{route('tabla')}}" style="display:inline-block">
+                        <input type="hidden" name="ordercol" value="{{$ordercol}}">
+                        <input type="hidden" name="database" value="{{$database}}">
+                        <input type="hidden" name="schema" value="{{$schema}}">
+                        <input type="hidden" name="tabla_selected" value="{{$tabla_selected}}">
+                        @if(isset($where1))
+                            <input type="hidden" name="columna_selected1" value="{{$columna_selected1}}">
+                            <input type="hidden" name="comparador1" value="{{$comparador1}}">
+                            <input type="hidden" name="where1" value="{{$where1}}">
+                        @endif
+                        <input type="hidden" name="sort" value="desc">
+                        <button type="submit" class="btn btn-sm btn-info">
+                            <i class="material-icons" style="font-size:9px;padding:-2px"><b>import_export</b></i>
+                            <span><small>Desc</small></span>
+                        </button>
+                    </form>
+                    <br>
+                    <small>{{$columna->data_type}}</small>
+                    <?php $ordercol++ ?>
+                </th>
             @endforeach
             </tr>
         </thead>
@@ -222,7 +162,7 @@
 				<?php
                     $count_columnas = count($columnas)+1;
                 ?>
-                	<td colspan="{{$count_columnas}}" class="alert-danger" align="left" style="padding-left:50px"><h3><b>Sin registros</b></h3></td>
+                	<td colspan="{{$count_columnas}}" class="alert-danger" align="left" style="padding-left:50px"><h3><b>Sin registros encontrados</b></h3></td>
             @endforelse
        </tbody>
     </table>

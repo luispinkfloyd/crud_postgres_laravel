@@ -44,17 +44,6 @@
 
 @section('content')
 
-@if(session()->get('mensaje_error'))
-
-    <div class="container alert alert-danger">
-        {{ session()->get('mensaje_error') }}
-        &nbsp;
-        &nbsp;
-        <input type="button" class="btn btn-sm btn-danger" value="x" onclick="javascript:window.location.reload();"/>  
-    </div><br />
-    
-@endif
-
 @if(isset($db_host) && isset($db_usuario))
 
 	<div class="alert-success cartel-host" align="center">

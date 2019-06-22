@@ -27,8 +27,6 @@ Route::get('/schema', 'HomeController@schema')->name('schema');
 
 Route::get('/tabla', 'HomeController@tabla')->name('tabla');
 
-//Route::get('/where1', 'HomeController@tabla')->name('where1');
-
 Route::get('/export_excel', 'HomeController@export_excel')->name('export_excel');
 
 Route::get('/store', 'HomeController@store')->name('home.store');

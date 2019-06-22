@@ -1,4 +1,4 @@
-<form class="form-general" action="{{ route('tabla') }}" method="get">
+<form class="form-general" action="{{ route('tabla') }}" method="get" style="margin-bottom:2px">
     <input type="hidden" name="database" value="{{$database}}">
     <input type="hidden" name="schema" value="{{$schema}}">
     <div class="row form-select-row">

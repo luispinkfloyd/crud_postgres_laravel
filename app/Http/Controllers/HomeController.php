@@ -20,21 +20,13 @@ use ReflectionClass;
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
+    
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
+    
     public function index()
     {
 		
@@ -225,6 +217,32 @@ class HomeController extends Controller
 				
 				$conexion = DB::connection('pgsql_variable');
 				
+				if($charset_def != 'UTF8'){
+				
+					$originales = utf8_decode('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ');
+						
+					$modificadas = utf8_decode('aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr');
+				
+				}else{
+					
+					$originales = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ';
+						
+					$modificadas = 'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr';
+					
+				}
+				
+				if(isset($request->where1)){
+					
+					if($request->comparador1 === 'ilike'){
+						
+						$date_function = date('dmYGis');
+					
+						$conexion->unprepared("CREATE OR REPLACE FUNCTION f_limpiar_acentos".$date_function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
+						
+					}
+					
+				}
+				
 				$sql="select table_name
 								from information_schema.tables 
 							   where table_schema = '".$schema."'
@@ -280,8 +298,6 @@ class HomeController extends Controller
 				
 				}
 				
-				//print_r($col_array); exit;
-				
 				$sort = 'asc';
 				
 				if(isset($request->sort)) $sort = $request->sort;
@@ -296,10 +312,6 @@ class HomeController extends Controller
 					
 				}
 				
-				
-				
-				//echo $col_string; exit;
-				
 				if(isset($request->where1)){
 					
 					$comparador1 = $request->comparador1;
@@ -308,16 +320,33 @@ class HomeController extends Controller
 					
 					$where1 = $request->where1;
 					
+					$busqueda = str_replace("´`'çÇ¨",'_',$where1);
+					
 					if($comparador1 === 'ilike'){
-						$registros = $registros->whereRaw("$columna_selected1::text ilike '%".$where1."%'");
+						
+						$registros = $registros->whereRaw("f_limpiar_acentos".$date_function."($columna_selected1)::text ilike f_limpiar_acentos".$date_function."('%".$busqueda."%')");
+						
 					}else{
-						$registros = $registros->where($columna_selected1,$comparador1,$where1);
+						
+						$registros = $registros->where($columna_selected1,$comparador1,$busqueda);
+						
 					}
+					
 				}
 				
 				$count_registros = count($registros->get());
 				
 				$registros = $registros->orderBy(DB::raw($col_string))->paginate(8);
+				
+				if(isset($request->where1)){
+					
+					if($request->comparador1 === 'ilike'){
+					
+						$conexion->unprepared('DROP FUNCTION f_limpiar_acentos".$date_function."(text)');
+						
+					}
+					
+				}
 				
 				return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'tabla_selected' => $tabla_selected,'registros' => $registros,'columnas' => $columnas,'db_usuario' => $db_usuario,'db_host' => $db_host,'comparador1' => $comparador1,'columna_selected1' => $columna_selected1,'where1' => $where1,'charset_def' => $charset_def,'count_registros' => $count_registros,'sort' => $sort,'ordercol_def' => $request->ordercol]);
 				
@@ -382,6 +411,32 @@ class HomeController extends Controller
 			
 			$conexion = DB::connection('pgsql_variable');
 			
+			if($charset_def != 'UTF8'){
+				
+				$originales = utf8_decode('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ');
+					
+				$modificadas = utf8_decode('aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr');
+			
+			}else{
+				
+				$originales = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ';
+					
+				$modificadas = 'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr';
+				
+			}
+			
+			if(isset($request->where1)){
+				
+				if($request->comparador1 === 'ilike'){
+					
+					$date_function = date('dmYGis');
+				
+					$conexion->unprepared("CREATE OR REPLACE FUNCTION f_limpiar_acentos".$date_function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
+					
+				}
+				
+			}
+			
 			$tabla_selected = $request->tabla_selected;
 			
 			$registros = $conexion->table($tabla_selected);
@@ -430,8 +485,6 @@ class HomeController extends Controller
 			
 			}
 			
-			//print_r($col_array); exit;
-			
 			$sort = 'asc';
 			
 			if(isset($request->sort)) $sort = $request->sort;
@@ -446,28 +499,39 @@ class HomeController extends Controller
 				
 			}
 			
-			
-			
-			//echo $col_string; exit;
-			
 			if(isset($request->where1)){
-				
+					
 				$comparador1 = $request->comparador1;
 				
 				$columna_selected1 = $request->columna_selected1;
 				
 				$where1 = $request->where1;
 				
+				$busqueda = str_replace("´`'çÇ¨",'_',$where1);
+				
 				if($comparador1 === 'ilike'){
-					$registros = $registros->whereRaw("$columna_selected1::text ilike '%".$where1."%'");
+					
+					$registros = $registros->whereRaw("f_limpiar_acentos".$date_function."($columna_selected1)::text ilike f_limpiar_acentos".$date_function."('%".$busqueda."%')");
+					
 				}else{
-					$registros = $registros->where($columna_selected1,$comparador1,$where1);
+					
+					$registros = $registros->where($columna_selected1,$comparador1,$busqueda);
+					
 				}
+				
 			}
 			
-			//$count_registros = count($registros->get());
-			
 			$registros = $registros->orderBy(DB::raw($col_string))->get();
+			
+			if(isset($request->where1)){
+					
+				if($request->comparador1 === 'ilike'){
+				
+					$conexion->unprepared('DROP FUNCTION f_limpiar_acentos".$date_function."(text)');
+					
+				}
+				
+			}
 			
 			$date = date('dmYGis');
 			
@@ -645,14 +709,6 @@ class HomeController extends Controller
 			
 			$insert = trim($insert, ',');
 			
-			/*echo $columnas_registro;
-			
-			echo '<br>';
-			
-			echo $insert;
-			
-			exit;*/
-			
 			$conexion->insert('insert into '.$tabla_selected.' ('.$columnas_registro.') values ('.$insert.');');
 			
 			return back()->withInput()->with('registro_agregado', 'El registro se agregó correctamente');
@@ -708,8 +764,6 @@ class HomeController extends Controller
 												  
 			
 			$valores_repetidos_primera_columna = $conexion->select($sql_valores_repetidos_primera_columna);
-			
-			//print_r($valores_repetidos_primera_columna); exit;
 			
 			if(count($valores_repetidos_primera_columna) === 0){
 			
@@ -797,8 +851,6 @@ class HomeController extends Controller
 			
 			$valores_repetidos_primera_columna = $conexion->select($sql_valores_repetidos_primera_columna);
 			
-			//print_r($valores_repetidos_primera_columna); exit;
-			
 			if(count($valores_repetidos_primera_columna) === 0){
 			
 				$count_modificaciones = 0;
@@ -842,17 +894,9 @@ class HomeController extends Controller
 						
 						$select_columna = $conexion->select($sql_select_columna);
 						
-						//$select_columna = NULL;
-						
-						//print_r($select_columna[0]->$columna_registro); exit;
-						
 						$select_columna = $select_columna[0]->$columna_registro;
 						
-						//echo $update; exit;
-						
 						if( $select_columna !== $request->$columna_registro){
-							
-							//echo $select_columna; exit;
 							
 							$conexion->update('update '.$tabla_selected.' set '.$columna_registro.' = '.$update.' where ('.$primera_columna.')::text = ('.$id.')::text;');
 							
@@ -863,8 +907,6 @@ class HomeController extends Controller
 					}
 					
 				}
-				
-				//echo $count_modificaciones; exit;
 				
 				if($count_modificaciones === 0){
 					
