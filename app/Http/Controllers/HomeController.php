@@ -14,6 +14,8 @@ use Box\Spout\Writer\Style\Color;
 use Box\Spout\Writer\Style\StyleBuilder;
 use Box\Spout\Writer\WriterFactory;
 
+use Session;
+
 use ReflectionClass;
 
 class HomeController extends Controller
@@ -84,7 +86,7 @@ class HomeController extends Controller
 			
 			$mensaje_error = $e->getMessage();
 			
-			return redirect('home')->with('mensaje_error',$mensaje_error);
+			return redirect('home')->withInput()->with('mensaje_error',$mensaje_error);
 			
 		}
 		
@@ -240,6 +242,64 @@ class HomeController extends Controller
 				
 				$where1 = NULL;
 				
+				$sql="select column_name
+							,is_nullable as required
+							,character_maximum_length as max_char
+							,data_type as type
+							,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
+						from INFORMATION_SCHEMA.columns col 
+					   where table_name = '".$tabla_selected."'
+						 and table_schema = '".$schema."'
+					order by col.ordinal_position";
+				
+				$columnas = $conexion->select($sql);
+				
+				$col_num = 1;
+				
+				$col_array = array();
+				
+				foreach($columnas as $columna){
+					
+					if(isset($request->ordercol)){
+					
+						
+						if($col_num == $request->ordercol){
+							
+							$col_num = $col_num + 1;
+							
+						}else{
+							
+							$col_array[] = $col_num++;
+							
+						}
+					}else{
+							
+						$col_array[] = $col_num++;
+						
+					}
+				
+				}
+				
+				//print_r($col_array); exit;
+				
+				$sort = 'asc';
+				
+				if(isset($request->sort)) $sort = $request->sort;
+				
+				if(isset($request->ordercol)){
+					
+					$col_string = $request->ordercol.' '.$sort.','.implode(",",$col_array);
+					
+				}else{
+					
+					$col_string = implode(",",$col_array);
+					
+				}
+				
+				
+				
+				//echo $col_string; exit;
+				
 				if(isset($request->where1)){
 					
 					$comparador1 = $request->comparador1;
@@ -255,23 +315,11 @@ class HomeController extends Controller
 					}
 				}
 				
-				$count_registros = count($registros->orderBy(DB::raw(' 1 '))->get());
+				$count_registros = count($registros->get());
 				
-				$registros = $registros->orderBy(DB::raw(' 1 '))->paginate(8);
+				$registros = $registros->orderBy(DB::raw($col_string))->paginate(8);
 				
-				$sql="select column_name
-							,is_nullable as required
-							,character_maximum_length as max_char
-							,data_type as type
-							,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
-						from INFORMATION_SCHEMA.columns col 
-					   where table_name = '".$tabla_selected."'
-						 and table_schema = '".$schema."'
-					order by col.ordinal_position";
-				
-				$columnas = $conexion->select($sql);
-				
-				return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'tabla_selected' => $tabla_selected,'registros' => $registros,'columnas' => $columnas,'db_usuario' => $db_usuario,'db_host' => $db_host,'comparador1' => $comparador1,'columna_selected1' => $columna_selected1,'where1' => $where1,'charset_def' => $charset_def,'count_registros' => $count_registros]);
+				return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'tabla_selected' => $tabla_selected,'registros' => $registros,'columnas' => $columnas,'db_usuario' => $db_usuario,'db_host' => $db_host,'comparador1' => $comparador1,'columna_selected1' => $columna_selected1,'where1' => $where1,'charset_def' => $charset_def,'count_registros' => $count_registros,'sort' => $sort,'ordercol_def' => $request->ordercol]);
 				
 			}else{
 				
@@ -311,7 +359,7 @@ class HomeController extends Controller
 			ini_set('memory_limit', -1);
 			
 			$database = $request->database;
-			
+				
 			$schema = $request->schema;
 			
 			$db_usuario = $request->session()->get('db_usuario');
@@ -344,6 +392,64 @@ class HomeController extends Controller
 			
 			$where1 = NULL;
 			
+			$sql="select column_name
+						,is_nullable as required
+						,character_maximum_length as max_char
+						,data_type as type
+						,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
+					from INFORMATION_SCHEMA.columns col 
+				   where table_name = '".$tabla_selected."'
+					 and table_schema = '".$schema."'
+				order by col.ordinal_position";
+			
+			$columnas = $conexion->select($sql);
+			
+			$col_num = 1;
+			
+			$col_array = array();
+			
+			foreach($columnas as $columna){
+				
+				if(isset($request->ordercol)){
+				
+					
+					if($col_num == $request->ordercol){
+						
+						$col_num = $col_num + 1;
+						
+					}else{
+						
+						$col_array[] = $col_num++;
+						
+					}
+				}else{
+						
+					$col_array[] = $col_num++;
+					
+				}
+			
+			}
+			
+			//print_r($col_array); exit;
+			
+			$sort = 'asc';
+			
+			if(isset($request->sort)) $sort = $request->sort;
+			
+			if(isset($request->ordercol)){
+				
+				$col_string = $request->ordercol.' '.$sort.','.implode(",",$col_array);
+				
+			}else{
+				
+				$col_string = implode(",",$col_array);
+				
+			}
+			
+			
+			
+			//echo $col_string; exit;
+			
 			if(isset($request->where1)){
 				
 				$comparador1 = $request->comparador1;
@@ -358,16 +464,10 @@ class HomeController extends Controller
 					$registros = $registros->where($columna_selected1,$comparador1,$where1);
 				}
 			}
-			$registros = $registros->orderBy(DB::raw(' 1 '))->get();
 			
-			$sql="select column_name
-						,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
-					from INFORMATION_SCHEMA.columns col 
-				   where table_name = '".$tabla_selected."'
-					 and table_schema = '".$schema."'
-				order by col.ordinal_position";
+			//$count_registros = count($registros->get());
 			
-			$columnas = $conexion->select($sql);
+			$registros = $registros->orderBy(DB::raw($col_string))->get();
 			
 			$date = date('dmYGis');
 			

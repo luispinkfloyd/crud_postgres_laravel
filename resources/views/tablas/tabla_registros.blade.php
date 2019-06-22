@@ -47,7 +47,7 @@
 </style>
 
 @endsection
-<form class="form-general" action="{{ route('where1') }}" method="get">
+<form class="form-general" action="{{ route('tabla') }}" method="get">
     <input type="hidden" name="database" value="{{$database}}">
     <input type="hidden" name="schema" value="{{$schema}}">
     <input type="hidden" name="tabla_selected" value="{{$tabla_selected}}">
@@ -142,6 +142,12 @@
                     <input type="hidden" name="comparador1" value="{{$comparador1}}">
                     <input type="hidden" name="where1" value="{{$where1}}">
                 @endif
+                @if(isset($sort))
+                    <input type="hidden" name="sort" value="{{$sort}}">
+                @endif
+                @if(isset($ordercol_def))
+                	<input type="hidden" name="ordercol" value="{{$ordercol_def}}">
+                @endif
                 <button type="submit" class="btn btn-success" style="margin:2px;"><img src="{{asset('img/excel.png')}}" height="20" style="float:left;padding-right:5px"><span>Exportar a  Excel</span></button>
             </form>
             @endif
@@ -150,12 +156,32 @@
         	<h3 style="margin:2px;">Nombre de tabla: <b>{{$tabla_selected}}</b> | <small>Total registros = <b>{{$count_registros}}</b></small></h3>
         </div>
     </div>
+    <?php $ordercol = 1; ?>
     <table class="table table-sm table-bordered table-striped table-hover">
         <thead>
             <tr>
             <th scope="col"></th>
             @foreach($columnas as $columna)
-                <th scope="col">{{$columna->column_name}}<br><small>{{$columna->data_type}}</small></th>
+                <th scope="col">{{$columna->column_name}}
+                <form method="get" action="{{route('tabla')}}" style="display:inline-block">
+                	<input type="hidden" name="ordercol" value="{{$ordercol++}}">
+                    <input type="hidden" name="database" value="{{$database}}">
+                    <input type="hidden" name="schema" value="{{$schema}}">
+                    <input type="hidden" name="tabla_selected" value="{{$tabla_selected}}">
+                    @if(isset($where1))
+                        <input type="hidden" name="columna_selected1" value="{{$columna_selected1}}">
+                        <input type="hidden" name="comparador1" value="{{$comparador1}}">
+                        <input type="hidden" name="where1" value="{{$where1}}">
+                    @endif
+                    @if($sort === 'asc')
+                    	<input type="hidden" name="sort" value="desc">
+                    @elseif($sort === 'desc')
+                    	<input type="hidden" name="sort" value="asc">
+                    @endif
+                    <button type="submit" class="btn btn-sm btn-info">
+                    	<i class="material-icons" style="font-size:9px;padding:-2px"><b>import_export</b></i>
+                    </button>
+                    </form><br><small>{{$columna->data_type}}</small></th>
             @endforeach
             </tr>
         </thead>
