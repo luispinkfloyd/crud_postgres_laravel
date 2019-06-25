@@ -217,6 +217,8 @@ class HomeController extends Controller
 				
 				$conexion = DB::connection('pgsql_variable');
 				
+				$function = 'f_limpiar_acentos_'.$db_usuario.'_'.$database.'_'.$schema;
+				
 				if($charset_def != 'UTF8'){
 				
 					$originales = utf8_decode('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ');
@@ -234,10 +236,8 @@ class HomeController extends Controller
 				if(isset($request->where1)){
 					
 					if($request->comparador1 === 'ilike'){
-						
-						$date_function = date('dmYGis');
 					
-						$conexion->unprepared("CREATE OR REPLACE FUNCTION f_limpiar_acentos".$date_function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
+						$conexion->unprepared("CREATE OR REPLACE FUNCTION ".$function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
 						
 					}
 					
@@ -324,7 +324,7 @@ class HomeController extends Controller
 					
 					if($comparador1 === 'ilike'){
 						
-						$registros = $registros->whereRaw("f_limpiar_acentos".$date_function."($columna_selected1)::text ilike f_limpiar_acentos".$date_function."('%".$busqueda."%')");
+						$registros = $registros->whereRaw($function."($columna_selected1::text) ilike ".$function."('%".$busqueda."%')");
 						
 					}else{
 						
@@ -342,7 +342,7 @@ class HomeController extends Controller
 					
 					if($request->comparador1 === 'ilike'){
 					
-						$conexion->unprepared('DROP FUNCTION f_limpiar_acentos".$date_function."(text)');
+						$conexion->unprepared('DROP FUNCTION '.$function.'(text)');
 						
 					}
 					
@@ -411,6 +411,8 @@ class HomeController extends Controller
 			
 			$conexion = DB::connection('pgsql_variable');
 			
+			$function = 'f_limpiar_acentos_'.$db_usuario.'_'.$database.'_'.$schema;
+			
 			if($charset_def != 'UTF8'){
 				
 				$originales = utf8_decode('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ');
@@ -426,12 +428,10 @@ class HomeController extends Controller
 			}
 			
 			if(isset($request->where1)){
-				
-				if($request->comparador1 === 'ilike'){
 					
-					$date_function = date('dmYGis');
+				if($request->comparador1 === 'ilike'){
 				
-					$conexion->unprepared("CREATE OR REPLACE FUNCTION f_limpiar_acentos".$date_function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
+					$conexion->unprepared("CREATE OR REPLACE FUNCTION ".$function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
 					
 				}
 				
@@ -511,7 +511,7 @@ class HomeController extends Controller
 				
 				if($comparador1 === 'ilike'){
 					
-					$registros = $registros->whereRaw("f_limpiar_acentos".$date_function."($columna_selected1)::text ilike f_limpiar_acentos".$date_function."('%".$busqueda."%')");
+					$registros = $registros->whereRaw($function."($columna_selected1::text) ilike ".$function."('%".$busqueda."%')");
 					
 				}else{
 					
@@ -527,7 +527,7 @@ class HomeController extends Controller
 					
 				if($request->comparador1 === 'ilike'){
 				
-					$conexion->unprepared('DROP FUNCTION f_limpiar_acentos".$date_function."(text)');
+					$conexion->unprepared('DROP FUNCTION '.$function.'(text)');
 					
 				}
 				
