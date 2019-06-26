@@ -30,26 +30,32 @@ class HomeController extends Controller
     public function index()
     {
 		
+		//Primero retorna la vista con el formulario para conectarse al host
 		return view('home');
+		
     }
 	
 	public function host(Request $request){
 		
+		
+		//Intenta hacer la conexión (en caso de fallar, retorna al home y muestra el mensaje de error)
 		try
 		{
 			
 			
-				
+			//Guardo el host, usuario y contraseña definidos en el form_host para hacer la conexión, en variables de sesión; mientras dure la sesión y no se modifiquen, la conexión siempre se va a realizar con estos valores
 			$request->session()->put('db_host',$request->db_host);
 			
 			$request->session()->put('db_usuario',$request->db_usuario);
 			
 			$request->session()->put('db_contrasenia',$request->db_contrasenia);
 			
+			//Traigo los valores de la conexión para manejarlos como variantes directamente (menos la contraseña)
 			$db_usuario = $request->session()->get('db_usuario');
 		
 			$db_host = $request->session()->get('db_host');
 			
+			//Genero el modelo de la conexión pgsql_variable con los valores definidos, y realizo la conexión
 			Config::set('database.connections.pgsql_variable', array(
 				'driver'    => 'pgsql',
 				'host'      => $db_host,
@@ -64,6 +70,7 @@ class HomeController extends Controller
 			
 			$conexion = DB::connection('pgsql_variable');
 			
+			//Hago la consulta para traer las bases de datos que haya en el host
 			$sql="select pg_database.datname
 						  from pg_database
 						 where pg_database.datname not in ('template0','template1')
@@ -71,11 +78,13 @@ class HomeController extends Controller
 			
 			$bases = $conexion->select($sql);
 			
+			//Retorno al home con los datos de la consulta
 			return view('home',['bases' => $bases,'db_usuario' => $db_usuario,'db_host' => $db_host]);
 			
 		}
 		catch (\Exception $e) {
 			
+			//En caso de error retorno al home con el mensaje del error
 			$mensaje_error = $e->getMessage();
 			
 			return redirect('home')->withInput()->with('mensaje_error',$mensaje_error);
@@ -87,8 +96,10 @@ class HomeController extends Controller
 	public function database(Request $request)
     {
         
+		//Verifico que los input session hechos en el método anterior sigan seteados
 		if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
 		
+			//Traigo los inputs session y la base de datos seleccionada en el form_database (todos los datos para armar la conexión, a partir de acá, se manejan por get)
 			$database = $request->database;
 			
 			$db_usuario = $request->session()->get('db_usuario');
@@ -107,9 +118,10 @@ class HomeController extends Controller
 				'schema'    => 'public',
 			));
 			
-			
+			//Realizo la conexión
 			$conexion = DB::connection('pgsql_variable');
 			
+			//Consulto los schemas disponibles de la base de datos seleccionada
 			$sql="select schema_name
 						from information_schema.schemata
 					   where not schema_name ilike 'pg%'
@@ -119,6 +131,7 @@ class HomeController extends Controller
 			
 			$schemas = $conexion->select($sql);
 			
+			//Consulto la codificación de la base y la almaceno en un input session para usarla en futuras consultas (hasta acá, siempre se usa la codificación UTF8)
 			$sql_charset = 'SHOW SERVER_ENCODING';
 			
 			$charset_registro = $conexion->select($sql_charset);
@@ -127,10 +140,12 @@ class HomeController extends Controller
 			
 			$request->session()->put('charset_def',$charset);
 			
+			//Retorno al home con los datos de las consultas
 			return view('home',['database' => $database,'schemas' => $schemas,'db_usuario' => $db_usuario,'db_host' => $db_host]);
 		
 		}else{
 			
+			//En caso que los input session no sigan seteados, redirecciono al home inicial
 			return redirect('home');
 			
 		}		
@@ -140,8 +155,10 @@ class HomeController extends Controller
 	public function schema(Request $request)
     {
         
+		//Verifico que los input session hechos en el primer método sigan seteados
 		if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
 				
+			//Traigo los inputs session y la base de datos seleccionada más el schema seleccionado en el form_schema
 			$database = $request->database;
 			
 			$schema = $request->schema;
@@ -163,9 +180,11 @@ class HomeController extends Controller
 				'prefix'    => '',
 				'schema'    => $schema,
 			));
-				
+			
+			//Realizo la conexión	
 			$conexion = DB::connection('pgsql_variable');
 			
+			//Consulto las tablas disponibles en el schema seleccionado
 			$sql="select table_name
 							from information_schema.tables 
 						   where table_schema = '".$schema."'
@@ -173,10 +192,12 @@ class HomeController extends Controller
 			
 			$tablas = $conexion->select($sql);
 			
+			//Retorno al home con los datos de las consultas
 			return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'db_usuario' => $db_usuario,'db_host' => $db_host]);
 			
 		}else{
 			
+			//En caso que los input session no sigan seteados, redirecciono al home inicial
 			return redirect('home');
 			
 		}
@@ -193,6 +214,8 @@ class HomeController extends Controller
 			
 			if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
 			
+				ini_set('memory_limit', -1);
+				
 				$database = $request->database;
 				
 				$schema = $request->schema;
@@ -712,6 +735,7 @@ class HomeController extends Controller
 			$conexion->insert('insert into '.$tabla_selected.' ('.$columnas_registro.') values ('.$insert.');');
 			
 			return back()->withInput()->with('registro_agregado', 'El registro se agregó correctamente');
+			
 		}
 		catch (\Exception $e) {
 			
@@ -918,7 +942,9 @@ class HomeController extends Controller
 					
 				}
 			}else{
+				
 				return back()->withInput()->with('registro_no_modificado', 'No se puede modificar '.$tabla_selected.' porque hay valores repetidos en la columna '.$primera_columna.' usada como primary key por la aplicación.');
+				
 			}
 		
 		}
