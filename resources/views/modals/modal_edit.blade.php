@@ -30,7 +30,7 @@ foreach($columnas as $columna){
                         @if($columna->column_name === $primera_columna)
                         	<label for="{{$columna->column_name}}">{{$columna->column_name}}:</label>
                             <input type="text" class="form-control" name="{{$columna->column_name}}" value="{{$registro->$nombre_columna}}" readonly>
-                        @elseif($columna->type === 'character' | $columna->type === 'character varying' | $columna->type === 'text' | $columna->type === 'char' | $columna->type === 'varchar'  | $columna->type === 'boolean')
+                        @elseif($columna->type === 'character' | $columna->type === 'character varying' | $columna->type === 'text' | $columna->type === 'char' | $columna->type === 'varchar')
                         <div class="form-group">
                             <label for="{{$columna->column_name}}">{{$columna->column_name}} 
                             <small>
@@ -121,6 +121,49 @@ foreach($columnas as $columna){
 							}else{
 								$value = $registro->$nombre_columna;
 							}
+							?>
+                            value="{{$value}}">
+                        </div>
+                        @elseif($columna->type === 'boolean')
+                        <div class="form-group">
+                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                                <small>
+                                <?php 
+                                if($columna->required === 'NO'){
+                                    echo '(Obligatorio)';
+                                }else{
+                                    echo '(No obligatorio)';
+                                }
+                                ?>
+                                </small>:
+                            </label>
+                            <select class="form-control" name="{{$columna->column_name}}"
+								<?php
+                                if($columna->required === 'NO') echo ' required ';
+                                ?>
+                            >
+                            <option disabled selected value>--Seleccione--</option>
+                            <option <?php if($registro->$nombre_columna === true) echo'selected'; ?>>true</option>
+                            <option <?php if($registro->$nombre_columna === false) echo'selected'; ?>>false</option>
+                            </select>
+                        </div>
+                        @elseif($columna->type === 'time without time zone')
+                        <div class="form-group">
+                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                                <small>
+                                <?php 
+                                if($columna->required === 'NO'){
+                                    echo '(Obligatorio)';
+                                }else{
+                                    echo '(No obligatorio)';
+                                }
+                                ?>
+                                </small>:
+                            </label>
+                            <input type="time" class="form-control" name="{{$columna->column_name}}"
+							<?php
+							if($columna->required === 'NO') echo ' required ';
+							$value = $registro->$nombre_columna;
 							?>
                             value="{{$value}}">
                         </div>
