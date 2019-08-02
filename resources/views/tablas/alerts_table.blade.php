@@ -28,12 +28,4 @@
             <input type="button" class="btn btn-sm btn-warning" value="x" onclick="javascript:window.location.reload();"/>
         </div>
     @endif
-    @if(session()->get('mensaje_error'))
-        <div class="alert alert-danger" style="text-align:center">
-            <b>{{ session()->get('mensaje_error') }}</b>
-            &nbsp;
-            &nbsp;
-            <input type="button" class="btn btn-sm btn-danger" value="x" onclick="javascript:window.location.reload();"/>  
-        </div>
-    @endif
 </div>
