@@ -31,6 +31,12 @@
 		border:#1F5B20 1px solid;
 		border-radius:3px;
 	}
+	.cartel-error{
+		max-width:50%;
+		margin:auto;
+		margin-bottom:5px;
+		padding:1px;
+	}
 	.div-paginacion{
 		min-width:90%;
 		margin:10px auto;
@@ -60,8 +66,9 @@
 	<div class="alert-success cartel-host" align="center">
     	<p><h4><b><small>Host:</small>{{$db_host}} <small>Usuario:</small>{{$db_usuario}} <a class="btn btn-info" href="{{ url('/') }}">Volver a seleccionar todo</a></b></h4></p>
     </div>
-    
+	
 @endif
+
 
 @if(isset($bases))
 

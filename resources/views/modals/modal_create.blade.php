@@ -13,76 +13,122 @@
 				<div class="modal-body">
                 	@foreach($columnas as $columna)
                         @if($columna->type === 'character' | $columna->type === 'character varying' | $columna->type === 'text' | $columna->type === 'char' | $columna->type === 'varchar')
-                        <div class="form-group">
-                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
-                            <small>
-                            <?php 
-							if($columna->required === 'NO'){
-								echo '(Obligatorio)';
-							}else{
-								echo '(No obligatorio)';
-							}
-							?>
-                            </small>:</label>
-                            <input type="text" class="form-control" name="{{$columna->column_name}}"
-                            <?php
-							if($columna->required === 'NO') echo ' required ';
-							if(isset($columna->max_char)) echo ' maxlength="'.$columna->max_char.'" ';
-							?>
-                            placeholder="texto...">
-                        </div>
+                            <div class="form-group">
+                                <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                                    <small>
+                                    <?php 
+                                    if($columna->required === 'NO'){
+                                        echo '(Obligatorio)';
+                                    }else{
+                                        echo '(No obligatorio)';
+                                    }
+                                    ?>
+                                    </small>:
+                                </label>
+                                <input type="text" class="form-control" name="{{$columna->column_name}}"
+									<?php
+                                    if($columna->required === 'NO') echo ' required ';
+                                    if(isset($columna->max_char)) echo ' maxlength="'.$columna->max_char.'" ';
+                                    ?>
+                                placeholder="texto...">
+                            </div>
                         @elseif($columna->type === 'int' | $columna->type === 'integer' | $columna->type === 'smallint' or $columna->type === 'bigint' | $columna->type === 'numeric')
                         <div class="form-group">
                             <label for="{{$columna->column_name}}">{{$columna->column_name}} 
-                            <small>
-                            <?php 
-							if($columna->required === 'NO'){
-								echo '(Obligatorio)';
-							}else{
-								echo '(No obligatorio)';
-							}
-							?>
-                            </small>:</label>
+                                <small>
+                                <?php 
+                                if($columna->required === 'NO'){
+                                    echo '(Obligatorio)';
+                                }else{
+                                    echo '(No obligatorio)';
+                                }
+                                ?>
+                                </small>:
+                            </label>
                             <input type="number" class="form-control" name="{{$columna->column_name}}"
-                            <?php
-							if($columna->required === 'NO') echo ' required ';
-							?>
+								<?php
+                                if($columna->required === 'NO') echo ' required ';
+                                ?>
                             placeholder="número...">
                         </div>
                         @elseif($columna->type === 'date')
                         <div class="form-group">
                             <label for="{{$columna->column_name}}">{{$columna->column_name}} 
-                            <small>
-                            <?php 
-							if($columna->required === 'NO'){
-								echo '(Obligatorio)';
-							}else{
-								echo '(No obligatorio)';
-							}
-							?>
-                            </small>:</label>
+                                <small>
+                                <?php 
+                                if($columna->required === 'NO'){
+                                    echo '(Obligatorio)';
+                                }else{
+                                    echo '(No obligatorio)';
+                                }
+                                ?>
+                                </small>:
+                            </label>
                             <input type="date" class="form-control" name="{{$columna->column_name}}"
-                            <?php
-							if($columna->required === 'NO') echo ' required ';
-							?>
+								<?php
+                                if($columna->required === 'NO') echo ' required ';
+                                ?>
                             >
                         </div>
                         @elseif($columna->type === 'timestamp without time zone' or $columna->type === 'timestamp with time zone')
                         <div class="form-group">
                             <label for="{{$columna->column_name}}">{{$columna->column_name}} 
-                            <small>
-                            <?php 
-							if($columna->required === 'NO'){
-								echo '(Obligatorio)';
-							}else{
-								echo '(No obligatorio)';
-							}
-							?>
-                            </small>:</label>
+                                <small>
+                                <?php 
+                                if($columna->required === 'NO'){
+                                    echo '(Obligatorio)';
+                                }else{
+                                    echo '(No obligatorio)';
+                                }
+                                ?>
+                                </small>:
+                            </label>
                             <input type="datetime-local" class="form-control" name="{{$columna->column_name}}"
-                            <?php
-							if($columna->required === 'NO') echo ' required ';
-							?>
+								<?php
+                                if($columna->required === 'NO') echo ' required ';
+                                ?>
+                            >
+                        </div>
+                        @elseif($columna->type === 'boolean')
+                        <div class="form-group">
+                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                                <small>
+                                <?php 
+                                if($columna->required === 'NO'){
+                                    echo '(Obligatorio)';
+                                }else{
+                                    echo '(No obligatorio)';
+                                }
+                                ?>
+                                </small>:
+                            </label>
+                            <select class="form-control" name="{{$columna->column_name}}"
+								<?php
+                                if($columna->required === 'NO') echo ' required ';
+                                ?>
+                            >
+                            <option disabled selected value>--Seleccione--</option>
+                            <option>true</option>
+                            <option>false</option>
+                            </select>
+                        </div>
+                        @elseif($columna->type === 'time without time zone')
+                        <div class="form-group">
+                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                                <small>
+                                <?php 
+                                if($columna->required === 'NO'){
+                                    echo '(Obligatorio)';
+                                }else{
+                                    echo '(No obligatorio)';
+                                }
+                                ?>
+                                </small>:
+                            </label>
+                            <input type="time" class="form-control" name="{{$columna->column_name}}"
+								<?php
+                                if($columna->required === 'NO') echo ' required ';
+                                ?>
                             >
                         </div>
                         @endif
