@@ -44,11 +44,23 @@
 
 @section('content')
 
+@if(session()->get('mensaje_error'))
+    <div class="container" style="max-width:600px;margin:2px auto 0px auto">
+        <div class="alert alert-danger" style="text-align:center">
+            <b>{{ session()->get('mensaje_error') }}</b>
+            &nbsp;
+            &nbsp;
+            <input type="button" class="btn btn-sm btn-danger" value="x" onclick="javascript:window.location.reload();"/>  
+        </div>
+    </div>
+@endif
+
 @if(isset($db_host) && isset($db_usuario))
 
 	<div class="alert-success cartel-host" align="center">
     	<p><h4><b><small>Host:</small>{{$db_host}} <small>Usuario:</small>{{$db_usuario}} <a class="btn btn-info" href="{{ url('/') }}">Volver a seleccionar todo</a></b></h4></p>
     </div>
+    
 @endif
 
 @if(isset($bases))
