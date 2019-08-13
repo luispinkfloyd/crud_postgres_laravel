@@ -209,11 +209,15 @@ class HomeController extends Controller
 		
 		try
 		{
-		
+			
 			if($request->tabla_selected === NULL){ return back()->withInput();}
+			
+			
 			
 			if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
 			
+				
+				
 				ini_set('memory_limit', -1);
 				
 				$database = $request->database;
@@ -240,7 +244,15 @@ class HomeController extends Controller
 				
 				$conexion = DB::connection('pgsql_variable');
 				
-				$function = 'f_limpiar_acentos_'.$db_usuario.'_'.$database.'_'.$schema;
+				if(isset($request->where1) && isset($request->caracteres_raros)){
+				
+					$function = 'f_limpiar_acentos_'.$db_usuario.'_'.$database.'_'.$schema;
+				
+				}else{
+					
+					$function = '';
+					
+				}
 				
 				if($charset_def != 'UTF8'){
 				
@@ -256,7 +268,7 @@ class HomeController extends Controller
 					
 				}
 				
-				if(isset($request->where1)){
+				if(isset($request->where1) && isset($request->caracteres_raros)){
 					
 					if($request->comparador1 === 'ilike'){
 					
@@ -341,7 +353,14 @@ class HomeController extends Controller
 					
 					$columna_selected1 = $request->columna_selected1;
 					
-					$where1 = $request->where1;
+					if($charset_def != 'UTF8'){
+					
+						$where1 = utf8_decode($request->where1);
+						
+					}else{
+						
+						$where1 = $request->where1;
+					}
 					
 					$busqueda = str_replace("´`'çÇ¨",'_',$where1);
 					
@@ -361,7 +380,9 @@ class HomeController extends Controller
 				
 				$registros = $registros->orderBy(DB::raw($col_string))->paginate(8);
 				
-				if(isset($request->where1)){
+				$caracteres_raros = NULL;
+				
+				if(isset($request->where1) && isset($request->caracteres_raros)){
 					
 					if($request->comparador1 === 'ilike'){
 					
@@ -369,9 +390,17 @@ class HomeController extends Controller
 						
 					}
 					
+					$caracteres_raros = 'S';
+					
 				}
 				
-				return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'tabla_selected' => $tabla_selected,'registros' => $registros,'columnas' => $columnas,'db_usuario' => $db_usuario,'db_host' => $db_host,'comparador1' => $comparador1,'columna_selected1' => $columna_selected1,'where1' => $where1,'charset_def' => $charset_def,'count_registros' => $count_registros,'sort' => $sort,'ordercol_def' => $request->ordercol]);
+				if($charset_def != 'UTF8'){
+					
+					$where1 = utf8_encode($where1);
+						
+				}
+				
+				return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'tabla_selected' => $tabla_selected,'registros' => $registros,'columnas' => $columnas,'db_usuario' => $db_usuario,'db_host' => $db_host,'comparador1' => $comparador1,'columna_selected1' => $columna_selected1,'where1' => $where1,'charset_def' => $charset_def,'count_registros' => $count_registros,'sort' => $sort,'ordercol_def' => $request->ordercol,'caracteres_raros' => $caracteres_raros]);
 				
 			}else{
 				

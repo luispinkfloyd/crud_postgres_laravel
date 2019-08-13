@@ -51,13 +51,11 @@
 @section('content')
 
 @if(session()->get('mensaje_error'))
-    <div class="container" style="max-width:600px;margin:2px auto 0px auto">
-        <div class="alert alert-danger" style="text-align:center">
-            <b>{{ session()->get('mensaje_error') }}</b>
-            &nbsp;
-            &nbsp;
-            <input type="button" class="btn btn-sm btn-danger" value="x" onclick="javascript:window.location.reload();"/>  
-        </div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="max-width:600px;margin:5px auto 10px auto" align="center">
+      <strong>{{ session()->get('mensaje_error') }}</strong>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
     </div>
 @endif
 

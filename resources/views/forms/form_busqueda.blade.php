@@ -35,12 +35,18 @@
                 </select>
             </div>
         </div>
-        <div class="col-sm-4 form-group">
+        <div class="col-sm-3 form-group">
             <div class="input-group">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="where1_span">Parámetro</span>
                 </div>
                 <input type="text" name="where1" class="form-control" placeholder="Parámetro de búsqueda..." required <?php if(isset($where1)) echo 'value="'.$where1.'"';?>>
+            </div>
+        </div>
+        <div class="col-sm-1 form-group">
+        	<div class="custom-control custom-checkbox" style="top:7px">
+              <input type="checkbox" name="caracteres_raros" class="custom-control-input" id="customCheck1" <?php if($caracteres_raros === 'S') echo 'checked'; ?>>
+              <label class="custom-control-label" for="customCheck1">Acentos</label>
             </div>
         </div>
         <div class="col-sm-2 form-group">
@@ -50,3 +56,13 @@
         </div>
     </div>
  </form>
+ 
+ @section('script')
+ 
+ <script type="text/javascript">
+ 
+ 
+ 
+ </script>
+ 
+ @endsection
