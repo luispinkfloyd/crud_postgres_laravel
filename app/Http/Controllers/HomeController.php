@@ -5,14 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use DB;
 use Config;
+use App\Exports\ExcelExport;
 use Maatwebsite\Excel\Facades\Excel;
-
-use Box\Spout\Common\Type;
-use Box\Spout\Writer\Style\Border;
-use Box\Spout\Writer\Style\BorderBuilder;
-use Box\Spout\Writer\Style\Color;
-use Box\Spout\Writer\Style\StyleBuilder;
-use Box\Spout\Writer\WriterFactory;
 
 use Session;
 
@@ -439,224 +433,19 @@ class HomeController extends Controller
 		{
 			ini_set('memory_limit', -1);
 			
-			$database = $request->database;
-				
-			$schema = $request->schema;
-			
-			$db_usuario = $request->session()->get('db_usuario');
-			
-			$db_host = $request->session()->get('db_host');
-			
-			$charset_def = $request->session()->get('charset_def');
-			
-			Config::set('database.connections.pgsql_variable', array(
-				'driver'    => 'pgsql',
-				'host'      => $db_host,
-				'database'  => $database,
-				'username'  => $db_usuario,
-				'password'  => $request->session()->get('db_contrasenia'),
-				'charset'   => $charset_def,
-				'collation' => 'utf8_unicode_ci',
-				'prefix'    => '',
-				'schema'    => $schema,
-			));
-			
-			$conexion = DB::connection('pgsql_variable');
-			
-			$function = 'f_limpiar_acentos_'.$db_usuario.'_'.$database.'_'.$schema;
-			
-			if($charset_def != 'UTF8'){
-				
-				$originales = utf8_decode('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ');
-					
-				$modificadas = utf8_decode('aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr');
-			
-			}else{
-				
-				$originales = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ';
-					
-				$modificadas = 'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr';
-				
-			}
-			
-			if(isset($request->where1)){
-					
-				if($request->comparador1 === 'ilike'){
-				
-					$conexion->unprepared("CREATE OR REPLACE FUNCTION ".$function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
-					
-				}
-				
-			}
-			
 			$tabla_selected = $request->tabla_selected;
-			
-			$registros = $conexion->table($tabla_selected);
-			
-			$comparador1 = NULL;
-				
-			$columna_selected1 = NULL;
-			
-			$where1 = NULL;
-			
-			$sql="select column_name
-						,is_nullable as required
-						,character_maximum_length as max_char
-						,data_type as type
-						,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
-					from INFORMATION_SCHEMA.columns col 
-				   where table_name = '".$tabla_selected."'
-					 and table_schema = '".$schema."'
-				order by col.ordinal_position";
-			
-			$columnas = $conexion->select($sql);
-			
-			$col_num = 1;
-			
-			$col_array = array();
-			
-			foreach($columnas as $columna){
-				
-				if(isset($request->ordercol)){
-				
-					
-					if($col_num == $request->ordercol){
-						
-						$col_num = $col_num + 1;
-						
-					}else{
-						
-						$col_array[] = $col_num++;
-						
-					}
-				}else{
-						
-					$col_array[] = $col_num++;
-					
-				}
-			
-			}
-			
-			$sort = 'asc';
-			
-			if(isset($request->sort)) $sort = $request->sort;
-			
-			if(isset($request->ordercol)){
-				
-				$col_string = $request->ordercol.' '.$sort.','.implode(",",$col_array);
-				
-			}else{
-				
-				$col_string = implode(",",$col_array);
-				
-			}
-			
-			if(isset($request->where1)){
-					
-				$comparador1 = $request->comparador1;
-				
-				$columna_selected1 = $request->columna_selected1;
-				
-				$where1 = $request->where1;
-				
-				$busqueda = str_replace("´`'çÇ¨",'_',$where1);
-				
-				if($comparador1 === 'ilike'){
-					
-					$registros = $registros->whereRaw($function."($columna_selected1::text) ilike ".$function."('%".$busqueda."%')");
-					
-				}else{
-					
-					$registros = $registros->where($columna_selected1,$comparador1,$busqueda);
-					
-				}
-				
-			}
-			
-			$registros = $registros->orderBy(DB::raw($col_string))->get();
-			
-			if(isset($request->where1)){
-					
-				if($request->comparador1 === 'ilike'){
-				
-					$conexion->unprepared('DROP FUNCTION '.$function.'(text)');
-					
-				}
-				
-			}
 			
 			$date = date('dmYGis');
 			
-			Excel::create('registros_'.$tabla_selected.'_'.$date, function ($excel) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas,$charset_def) {
+			return Excel::download(new ExcelExport($request), 'registros_'.$tabla_selected.'_'.$date.'.xlsx');
+			
+			/*Excel::create('registros_'.$tabla_selected.'_'.$date, function ($excel) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas,$charset_def) {
 				$excel->setTitle('Registros de '.$tabla_selected);
 				$excel->sheet('Detalle Registros', function ($sheet) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas,$charset_def) {
 					$sheet->loadView('export.export_excel')->with(['db_host' => $db_host,'db_usuario' => $db_usuario,'database' => $database,'tabla_selected' => $tabla_selected,'columna_selected1' => $columna_selected1,'comparador1' => $comparador1,'where1' => $where1,'registros' => $registros,'columnas' => $columnas,'charset_def' => $charset_def]);;
 				})->download('xls');
 			return back();
-			});
-			
-			//$singleRow = $this->object_to_array($columnas);
-			
-			/*$columna_array = array();
-			
-			foreach($columnas as $columna){
-				$columnas_array[] = $columna->column_name.' ('.$columna->data_type.')';
-			}*/
-			
-			/*print_r($columnas_array);
-			
-			exit;*/
-			
-			/*foreach($registros as $registro){
-				
-				$registros_array[] = (array)$registro;
-				
-			}*/
-			
-			/*print_r($registros_array);
-			
-			exit;*/
-			
-			/*$border = (new BorderBuilder())
-							  ->setBorderBottom(Color::BLACK, Border::WIDTH_THIN, Border::STYLE_SOLID)
-							  ->setBorderRight(Color::BLACK, Border::WIDTH_THIN, Border::STYLE_SOLID)
-							  ->build();
-			
-			$style_primera_linea = (new StyleBuilder())
-								   ->setFontBold()
-								   ->setFontSize(12)
-								   ->setFontColor(Color::WHITE)
-								   //->setShouldWrapText(false)
-								   ->setBackgroundColor(Color::DARK_BLUE)
-								   ->setBorder($border)
-								   ->build();
-								   
-			$style_resto_filas = (new StyleBuilder())
-								   //->setFontBold(false)
-								   ->setFontSize(11)
-								   ->setFontColor(Color::BLACK)
-								   ->setShouldWrapText(true)
-								   ->setBackgroundColor(Color::WHITE)
-								   ->setBorder($border)
-								   ->build();*/
-			
-			//$writer = WriterFactory::create(Type::XLSX); // for XLSX files
-			//$writer = WriterFactory::create(Type::CSV); // for CSV files
-			//$writer = WriterFactory::create(Type::ODS); // for ODS files
-			
-			//$fileName = 'registros_'.$tabla_selected.'_'.$date.'.xlsx';
-			
-			//$writer->openToFile($filePath); // write data to a file or to a PHP stream
-			//$writer->openToBrowser($fileName); // stream data directly to the browser
-			
-			//$columnas_array = ['columna1','columna2'];
-			
-			/*$writer->addRowWithStyle($columnas_array,$style_primera_linea); // add a row at a time
-			
-			
-			$writer->addRowsWithStyle($registros_array,$style_resto_filas); // add multiple rows at a time
-			
-			$writer->close();*/
+			});*/
 			
 			//return back();
 			

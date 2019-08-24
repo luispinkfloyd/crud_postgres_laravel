@@ -1,43 +1,27 @@
-<style>
-tr > td {
-	border: 1px solid #000000;
-}
-
-.registros tr:first-child{
-	background-color: #1D2839;
-	color: #FFFFFF;
-	border: 1px solid #000000;
-}
-
-.botones tr > td{
-	border:#000000 thick 1px;
-	color: #292929;
-}
-</style>
-<table class="botones">
+<table>
 	<tr>
-    	<td align="right"><p>Host:</p></td><td><p><h4><b>{{$db_host}}</b></h4></p></td>
+		<td>Host:</td><td style="color: #2A267C">{{$db_host}}</td>
     </tr>
     <tr>
-        <td align="right"><p>Usuario:</p></td><td><p><h4><b>{{$db_usuario}}</b></h4></p></td>
+        <td>Usuario:</td><td style="color: #2A267C">{{$db_usuario}}</td>
     </tr>
     <tr>
-        <td align="right"><p>Data Base:</p></td><td><p><h4><b>{{$database}}</b></h4></p></td>
+        <td>Data Base:</td><td style="color: #2A267C">{{$database}}</td>
     </tr>
     <tr>
-        <td align="right"><p>Tabla:</p></td><td><p><h4><b>{{$tabla_selected}}</b></h4></p></td>
+        <td>Tabla:</td><td style="color: #2A267C">{{$tabla_selected}}</td>
     </tr>
 </table>
 @if(isset($where1))
-<table class="botones">
+<table>
 	<tr>
-    	<td><p>Columna:</p></td><td><p><h4><b>{{$columna_selected1}}</b></h4></p></td>
+    	<td>Columna:</td><td style="color: #2A267C">{{$columna_selected1}}</td>
     </tr>
     <tr>
-        <td><p>Comparador:</p></td><td><p><h4><b>{{$comparador1}}</b></h4></p></td>
+        <td>Comparador:</td><td style="color: #2A267C">{{$comparador1}}</td>
     </tr>
     <tr>
-        <td><p>Parámetro:</p></td><td><p><h4><b>{{$where1}}</b></h4></p></td>
+        <td>Parámetro:</td><td style="color: #2A267C">{{$where1}}</td>
     </tr>
     
 </table>
@@ -46,7 +30,7 @@ tr > td {
     <tbody>
         <tr>
         @foreach($columnas as $columna)
-            <td>{{$columna->column_name}} ({{$columna->data_type}})</td>
+            <td style="color:#FFFFFF;background-color:#160f30;">{{$columna->column_name}} ({{$columna->data_type}})</td>
         @endforeach
         </tr>
         @forelse($registros as $registro)
