@@ -185,18 +185,16 @@ class ExcelExport implements FromView , ShouldAutoSize , WithEvents
 
 		$date = date('dmYGis');
 
-		return view('export.export_excel', [
-			 'db_host' => $db_host
-			,'db_usuario' => $db_usuario
-			,'database' => $database
-			,'tabla_selected' => $tabla_selected
-			,'columna_selected1' => $columna_selected1
-			,'comparador1' => $comparador1
-			,'where1' => $where1
-			,'registros' => $registros
-			,'columnas' => $columnas
-			,'charset_def' => $charset_def
-		]);
+		return view('export.export_excel', ['db_host' => $db_host
+										   ,'db_usuario' => $db_usuario
+										   ,'database' => $database
+										   ,'tabla_selected' => $tabla_selected
+										   ,'columna_selected1' => $columna_selected1
+										   ,'comparador1' => $comparador1
+										   ,'where1' => $where1
+										   ,'registros' => $registros
+										   ,'columnas' => $columnas
+										   ,'charset_def' => $charset_def]);
 		
     }
 	

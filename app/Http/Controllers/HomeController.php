@@ -12,6 +12,8 @@ use Session;
 
 use ReflectionClass;
 
+use Cache;
+
 class HomeController extends Controller
 {
     
@@ -214,15 +216,64 @@ class HomeController extends Controller
 				
 				ini_set('memory_limit', -1);
 				
+				/*-----------------------------------------------------*/
+				
+				
+				
+				Cache::put('where1',$request->where1,3600); 'where1' => $where1;
+					
+				Cache::put('caracteres_raros',$request->caracteres_raros,3600); 'caracteres_raros' => $caracteres_raros;
+				
+				Cache::put('tablas',$tablas,3600); 'tablas' => $tablas;
+				
+				Cache::put('tabla_selected',$tabla_selected,3600); 'tabla_selected' => $tabla_selected;
+				
+				Cache::put('comparador1',$comparador1,3600); 'comparador1' => $comparador1;
+				
+				Cache::put('columna_selected1',$columna_selected1,3600); 'columna_selected1' => $columna_selected1;
+				
+				Cache::put('sort',$sort,3600); 'sort' => $sort;
+				
+				Cache::put('ordercol',$request->ordercol,3600); 'ordercol_def' => $request->ordercol;
+					
+				Cache::put('columnas',$columnas,3600); 'columnas' => $columnas;
+				
+				Cache::put('registros',$registros,3600); 'registros' => $registros;
+				
+				Cache::put('count_registros',$count_registros,3600); 'count_registros' => $count_registros;
+				
+				if(Cache::get('tabla_selected') == $request->tabla_selected){
+					
+					
+					
+					
+				}
+				
+				
+				/*-----------------------------------------------------*/
+				
+				
 				$database = $request->database;
 				
+				Cache::forget('database');
+				
+				Cache::put('database',$database);
+				
 				$schema = $request->schema;
+				
+				Cache::forget('schema');
+				
+				Cache::put('schema',$schema);
 				
 				$db_usuario = $request->session()->get('db_usuario');
 				
 				$db_host = $request->session()->get('db_host');
 				
 				$charset_def = $request->session()->get('charset_def');
+				
+				
+				/*------------------ A partir de acá empieza el if del cache -----*/
+				
 				
 				Config::set('database.connections.pgsql_variable', array(
 					'driver'    => 'pgsql',
@@ -239,6 +290,8 @@ class HomeController extends Controller
 				$conexion = DB::connection('pgsql_variable');
 				
 				if(isset($request->where1) && isset($request->caracteres_raros)){
+					
+					Cache::put('caracteres_raros',$request->caracteres_raros,3600);
 				
 					$function = 'f_limpiar_acentos_'.$db_usuario.'_'.$database.'_'.$schema;
 				
@@ -279,7 +332,11 @@ class HomeController extends Controller
 				
 				$tablas = $conexion->select($sql);
 				
+				Cache::put('tablas',$tablas,3600);
+				
 				$tabla_selected = $request->tabla_selected;
+				
+				Cache::put('tabla_selected',$tabla_selected,3600);
 				
 				$registros = $conexion->table($tabla_selected);
 				
@@ -300,6 +357,8 @@ class HomeController extends Controller
 					order by col.ordinal_position";
 				
 				$columnas = $conexion->select($sql);
+				
+				Cache::put('columnas',$columnas,3600);
 				
 				$col_num = 1;
 				
@@ -329,9 +388,11 @@ class HomeController extends Controller
 				
 				$sort = 'asc';
 				
-				if(isset($request->sort)) $sort = $request->sort;
+				if(isset($request->sort)){ $sort = $request->sort; Cache::put('sort',$sort,3600); }
 				
 				if(isset($request->ordercol)){
+					
+					Cache::put('ordercol',$request->ordercol,3600);
 					
 					$col_string = $request->ordercol.' '.$sort.','.implode(",",$col_array);
 					
@@ -343,9 +404,15 @@ class HomeController extends Controller
 				
 				if(isset($request->where1)){
 					
+					Cache::put('where1',$request->where1,3600);
+					
 					$comparador1 = $request->comparador1;
 					
+					Cache::put('comparador1',$comparador1,3600);
+					
 					$columna_selected1 = $request->columna_selected1;
+					
+					Cache::put('columna_selected1',$columna_selected1,3600);
 					
 					if($charset_def != 'UTF8'){
 					
@@ -370,10 +437,6 @@ class HomeController extends Controller
 					
 				}
 				
-				$count_registros = count($registros->get());
-				
-				$registros = $registros->orderBy(DB::raw($col_string))->paginate(8);
-				
 				$caracteres_raros = NULL;
 				
 				if(isset($request->where1) && isset($request->caracteres_raros)){
@@ -394,7 +457,32 @@ class HomeController extends Controller
 						
 				}
 				
-				return view('home',['database' => $database,'schema' => $schema,'tablas' => $tablas,'tabla_selected' => $tabla_selected,'registros' => $registros,'columnas' => $columnas,'db_usuario' => $db_usuario,'db_host' => $db_host,'comparador1' => $comparador1,'columna_selected1' => $columna_selected1,'where1' => $where1,'charset_def' => $charset_def,'count_registros' => $count_registros,'sort' => $sort,'ordercol_def' => $request->ordercol,'caracteres_raros' => $caracteres_raros]);
+				$count_registros = count($registros->get());
+				
+				Cache::put('registros',$registros,3600);
+				
+				Cache::put('count_registros',$count_registros,3600);
+				
+				/*--------------- Acá termina el if del cache -----------------*/
+				
+				$registros = $registros->orderBy(DB::raw($col_string))->paginate(8);
+				
+				return view('home',['database' => $database,
+									'schema' => $schema,
+									'tablas' => $tablas,
+									'tabla_selected' => $tabla_selected,
+									'registros' => $registros,
+									'columnas' => $columnas,
+									'db_usuario' => $db_usuario,
+									'db_host' => $db_host,
+									'comparador1' => $comparador1,
+									'columna_selected1' => $columna_selected1,
+									'where1' => $where1,
+									'charset_def' => $charset_def,
+									'count_registros' => $count_registros,
+									'sort' => $sort,
+									'ordercol_def' => $request->ordercol,
+									'caracteres_raros' => $caracteres_raros]);
 				
 			}else{
 				
@@ -438,16 +526,6 @@ class HomeController extends Controller
 			$date = date('dmYGis');
 			
 			return Excel::download(new ExcelExport($request), 'registros_'.$tabla_selected.'_'.$date.'.xlsx');
-			
-			/*Excel::create('registros_'.$tabla_selected.'_'.$date, function ($excel) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas,$charset_def) {
-				$excel->setTitle('Registros de '.$tabla_selected);
-				$excel->sheet('Detalle Registros', function ($sheet) use ($db_host,$db_usuario,$database,$tabla_selected,$columna_selected1,$comparador1,$where1,$registros,$columnas,$charset_def) {
-					$sheet->loadView('export.export_excel')->with(['db_host' => $db_host,'db_usuario' => $db_usuario,'database' => $database,'tabla_selected' => $tabla_selected,'columna_selected1' => $columna_selected1,'comparador1' => $comparador1,'where1' => $where1,'registros' => $registros,'columnas' => $columnas,'charset_def' => $charset_def]);;
-				})->download('xls');
-			return back();
-			});*/
-			
-			//return back();
 			
 		}
 		catch (\Exception $e)
