@@ -34,3 +34,6 @@ Route::get('/store', 'HomeController@store')->name('home.store');
 Route::get('/destroy/{id}', 'HomeController@destroy')->name('home.destroy');
 
 Route::get('/edit/{id}', 'HomeController@edit')->name('home.edit');
+
+Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
+

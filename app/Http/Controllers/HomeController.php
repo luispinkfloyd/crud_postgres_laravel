@@ -14,6 +14,9 @@ use ReflectionClass;
 
 use Cache;
 
+use Illuminate\Support\Facades\Input;
+use Illuminate\Pagination\LengthAwarePaginator;
+
 class HomeController extends Controller
 {
     
@@ -21,12 +24,27 @@ class HomeController extends Controller
     {
         $this->middleware('auth');
     }
+	
+	public function paginacion($array, $request)
+	{
+		$page = Input::get('page', 1);
+		
+		$perPage = 5;
+		
+		$offset = ($page * $perPage) - $perPage;
+
+		return new LengthAwarePaginator(array_slice($array, $offset, $perPage, true), count($array), $perPage, $page,['path' => $request->url(), 'query' => $request->query()]);
+		
+	}
 
     
     public function index()
     {
 		
 		//Primero retorna la vista con el formulario para conectarse al host
+		
+		Cache::flush();
+		
 		return view('home');
 		
     }
@@ -206,266 +224,302 @@ class HomeController extends Controller
 		try
 		{
 			
-			if($request->tabla_selected === NULL){ return back()->withInput();}
+			if($request->tabla_selected === NULL){ return back()->withInput('mensaje_error','Selección de tabla vacía');}
 			
 			
 			
 			if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
-			
-				
 				
 				ini_set('memory_limit', -1);
 				
-				/*-----------------------------------------------------*/
-				
-				
-				
-				Cache::put('where1',$request->where1,3600); 'where1' => $where1;
+				if(Cache::get('tabla_selected') != $request->tabla_selected
+				|| Cache::get('columna_selected1') != $request->columna_selected1
+				|| Cache::get('comparador1') != $request->comparador1
+				|| Cache::get('where1') != $request->where1
+				|| Cache::get('ordercol') != $request->ordercol){
 					
-				Cache::put('caracteres_raros',$request->caracteres_raros,3600); 'caracteres_raros' => $caracteres_raros;
+					$database = $request->database;
 				
-				Cache::put('tablas',$tablas,3600); 'tablas' => $tablas;
-				
-				Cache::put('tabla_selected',$tabla_selected,3600); 'tabla_selected' => $tabla_selected;
-				
-				Cache::put('comparador1',$comparador1,3600); 'comparador1' => $comparador1;
-				
-				Cache::put('columna_selected1',$columna_selected1,3600); 'columna_selected1' => $columna_selected1;
-				
-				Cache::put('sort',$sort,3600); 'sort' => $sort;
-				
-				Cache::put('ordercol',$request->ordercol,3600); 'ordercol_def' => $request->ordercol;
-					
-				Cache::put('columnas',$columnas,3600); 'columnas' => $columnas;
-				
-				Cache::put('registros',$registros,3600); 'registros' => $registros;
-				
-				Cache::put('count_registros',$count_registros,3600); 'count_registros' => $count_registros;
-				
-				if(Cache::get('tabla_selected') == $request->tabla_selected){
-					
-					
-					
-					
-				}
-				
-				
-				/*-----------------------------------------------------*/
-				
-				
-				$database = $request->database;
-				
-				Cache::forget('database');
-				
-				Cache::put('database',$database);
-				
-				$schema = $request->schema;
-				
-				Cache::forget('schema');
-				
-				Cache::put('schema',$schema);
-				
-				$db_usuario = $request->session()->get('db_usuario');
-				
-				$db_host = $request->session()->get('db_host');
-				
-				$charset_def = $request->session()->get('charset_def');
-				
-				
-				/*------------------ A partir de acá empieza el if del cache -----*/
-				
-				
-				Config::set('database.connections.pgsql_variable', array(
-					'driver'    => 'pgsql',
-					'host'      => $db_host,
-					'database'  => $database,
-					'username'  => $db_usuario,
-					'password'  => $request->session()->get('db_contrasenia'),
-					'charset'   => $charset_def,
-					'collation' => 'utf8_unicode_ci',
-					'prefix'    => '',
-					'schema'    => $schema,
-				));
-				
-				$conexion = DB::connection('pgsql_variable');
-				
-				if(isset($request->where1) && isset($request->caracteres_raros)){
-					
-					Cache::put('caracteres_raros',$request->caracteres_raros,3600);
-				
-					$function = 'f_limpiar_acentos_'.$db_usuario.'_'.$database.'_'.$schema;
-				
-				}else{
-					
-					$function = '';
-					
-				}
-				
-				if($charset_def != 'UTF8'){
-				
-					$originales = utf8_decode('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ');
+					Cache::forget('database');
+
+					Cache::put('database',$database);
+
+					$schema = $request->schema;
+
+					Cache::forget('schema');
+
+					Cache::put('schema',$schema);
+
+					$db_usuario = $request->session()->get('db_usuario');
+
+					$db_host = $request->session()->get('db_host');
+
+					$charset_def = $request->session()->get('charset_def');
+
+
+					/*------------------ A partir de acá empieza el if del cache -----*/
+
+
+					Config::set('database.connections.pgsql_variable', array(
+						'driver'    => 'pgsql',
+						'host'      => $db_host,
+						'database'  => $database,
+						'username'  => $db_usuario,
+						'password'  => $request->session()->get('db_contrasenia'),
+						'charset'   => $charset_def,
+						'collation' => 'utf8_unicode_ci',
+						'prefix'    => '',
+						'schema'    => $schema,
+					));
+
+					$conexion = DB::connection('pgsql_variable');
+
+					if(isset($request->where1) && isset($request->caracteres_raros)){
+
+						Cache::forget('caracteres_raros');
 						
-					$modificadas = utf8_decode('aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr');
-				
-				}else{
-					
-					$originales = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ';
-						
-					$modificadas = 'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr';
-					
-				}
-				
-				if(isset($request->where1) && isset($request->caracteres_raros)){
-					
-					if($request->comparador1 === 'ilike'){
-					
-						$conexion->unprepared("CREATE OR REPLACE FUNCTION ".$function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
-						
-					}
-					
-				}
-				
-				$sql="select table_name
-								from information_schema.tables 
-							   where table_schema = '".$schema."'
-							order by table_name;";
-				
-				$tablas = $conexion->select($sql);
-				
-				Cache::put('tablas',$tablas,3600);
-				
-				$tabla_selected = $request->tabla_selected;
-				
-				Cache::put('tabla_selected',$tabla_selected,3600);
-				
-				$registros = $conexion->table($tabla_selected);
-				
-				$comparador1 = NULL;
-					
-				$columna_selected1 = NULL;
-				
-				$where1 = NULL;
-				
-				$sql="select column_name
-							,is_nullable as required
-							,character_maximum_length as max_char
-							,data_type as type
-							,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
-						from INFORMATION_SCHEMA.columns col 
-					   where table_name = '".$tabla_selected."'
-						 and table_schema = '".$schema."'
-					order by col.ordinal_position";
-				
-				$columnas = $conexion->select($sql);
-				
-				Cache::put('columnas',$columnas,3600);
-				
-				$col_num = 1;
-				
-				$col_array = array();
-				
-				foreach($columnas as $columna){
-					
-					if(isset($request->ordercol)){
-					
-						
-						if($col_num == $request->ordercol){
-							
-							$col_num = $col_num + 1;
-							
-						}else{
-							
-							$col_array[] = $col_num++;
-							
-						}
+						Cache::put('caracteres_raros',$request->caracteres_raros,3600);
+
+						$function = 'f_limpiar_acentos_'.$db_usuario.'_'.$database.'_'.$schema;
+
 					}else{
-							
-						$col_array[] = $col_num++;
-						
+
+						$function = '';
+
 					}
-				
-				}
-				
-				$sort = 'asc';
-				
-				if(isset($request->sort)){ $sort = $request->sort; Cache::put('sort',$sort,3600); }
-				
-				if(isset($request->ordercol)){
+
+					if($charset_def != 'UTF8'){
+
+						$originales = utf8_decode('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ');
+
+						$modificadas = utf8_decode('aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr');
+
+					}else{
+
+						$originales = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ';
+
+						$modificadas = 'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr';
+
+					}
+
+					if(isset($request->where1) && isset($request->caracteres_raros)){
+
+						if($request->comparador1 === 'ilike'){
+
+							$conexion->unprepared("CREATE OR REPLACE FUNCTION ".$function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
+
+						}
+
+					}
+
+					$sql="select table_name
+									from information_schema.tables 
+								   where table_schema = '".$schema."'
+								order by table_name;";
+
+					$tablas = $conexion->select($sql);
+					
+					Cache::forget('tablas');
+
+					Cache::put('tablas',$tablas,3600);
+
+					$tabla_selected = $request->tabla_selected;
+					
+					Cache::forget('tabla_selected');
+
+					Cache::put('tabla_selected',$tabla_selected,3600);
+
+					$registros = $conexion->table($tabla_selected);
+
+					$comparador1 = NULL;
+
+					$columna_selected1 = NULL;
+
+					$where1 = NULL;
+
+					$sql="select column_name
+								,is_nullable as required
+								,character_maximum_length as max_char
+								,data_type as type
+								,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
+							from INFORMATION_SCHEMA.columns col 
+						   where table_name = '".$tabla_selected."'
+							 and table_schema = '".$schema."'
+						order by col.ordinal_position";
+
+					$columnas = $conexion->select($sql);
+					
+					Cache::forget('columnas');
+
+					Cache::put('columnas',$columnas,3600);
+
+					$col_num = 1;
+
+					$col_array = array();
+
+					foreach($columnas as $columna){
+
+						if(isset($request->ordercol)){
+
+
+							if($col_num == $request->ordercol){
+
+								$col_num = $col_num + 1;
+
+							}else{
+
+								$col_array[] = $col_num++;
+
+							}
+						}else{
+
+							$col_array[] = $col_num++;
+
+						}
+
+					}
+
+					$sort = 'asc';
+
+					if(isset($request->sort)){ $sort = $request->sort; Cache::put('sort',$sort,3600); }
+
+					if(isset($request->ordercol)){
+						
+						$ordercol = $request->ordercol;
+
+						$col_string = $request->ordercol.' '.$sort.','.implode(",",$col_array);
+
+					}else{
+						
+						$ordercol = NULL;
+
+						$col_string = implode(",",$col_array);
+
+					}
+					
+					Cache::forget('ordercol');
 					
 					Cache::put('ordercol',$request->ordercol,3600);
+
+					if(isset($request->where1)){
+						
+						Cache::forget('where1');
+
+						Cache::put('where1',$request->where1,3600);
+
+						$comparador1 = $request->comparador1;
+						
+						Cache::forget('comparador1');
+
+						Cache::put('comparador1',$comparador1,3600);
+
+						$columna_selected1 = $request->columna_selected1;
+						
+						Cache::forget('columna_selected1');
+
+						Cache::put('columna_selected1',$columna_selected1,3600);
+
+						if($charset_def != 'UTF8'){
+
+							$where1 = utf8_decode($request->where1);
+
+						}else{
+
+							$where1 = $request->where1;
+						}
+
+						$busqueda = str_replace("´`'çÇ¨",'_',$where1);
+
+						if($comparador1 === 'ilike'){
+
+							$registros = $registros->whereRaw($function."($columna_selected1::text) ilike ".$function."('%".$busqueda."%')");
+
+						}else{
+
+							$registros = $registros->where($columna_selected1,$comparador1,$busqueda);
+
+						}
+
+					}
+
+					$caracteres_raros = NULL;
+
+					if(isset($request->where1) && isset($request->caracteres_raros)){
+
+						if($request->comparador1 === 'ilike'){
+
+							$conexion->unprepared('DROP FUNCTION '.$function.'(text)');
+
+						}
+
+						$caracteres_raros = 'S';
+
+					}
+
+					if($charset_def != 'UTF8'){
+
+						$where1 = utf8_encode($where1);
+
+					}
+
+					$count_registros = count($registros->get());
 					
-					$col_string = $request->ordercol.' '.$sort.','.implode(",",$col_array);
+					$registros = $registros->orderBy(DB::raw($col_string))->get()->toArray();
+
+					Cache::forget('registros');
+					
+					Cache::put('registros',$registros,3600);
+					
+					Cache::forget('count_registros');
+
+					Cache::put('count_registros',$count_registros,3600);
 					
 				}else{
 					
-					$col_string = implode(",",$col_array);
+					$db_usuario = $request->session()->get('db_usuario');
+
+					$db_host = $request->session()->get('db_host');
+
+					$charset_def = $request->session()->get('charset_def');
+					
+					$database = Cache::get('database');
+					
+					$schema = Cache::get('schema');
+					
+					$where1 = Cache::get('where1');
+					
+					$caracteres_raros = Cache::get('caracteres_raros');
+
+					$tablas = Cache::get('tablas');
+
+					$tabla_selected = Cache::get('tabla_selected');
+
+					$comparador1 = Cache::get('comparador1');
+
+					$columna_selected1 = Cache::get('columna_selected1');
+
+					$sort = Cache::get('sort');
+
+					$ordercol = Cache::get('ordercol');
+
+					$columnas = Cache::get('columnas');
+
+					$registros = Cache::get('registros');
+
+					$count_registros = Cache::get('count_registros');
 					
 				}
 				
-				if(isset($request->where1)){
-					
-					Cache::put('where1',$request->where1,3600);
-					
-					$comparador1 = $request->comparador1;
-					
-					Cache::put('comparador1',$comparador1,3600);
-					
-					$columna_selected1 = $request->columna_selected1;
-					
-					Cache::put('columna_selected1',$columna_selected1,3600);
-					
-					if($charset_def != 'UTF8'){
-					
-						$where1 = utf8_decode($request->where1);
-						
-					}else{
-						
-						$where1 = $request->where1;
-					}
-					
-					$busqueda = str_replace("´`'çÇ¨",'_',$where1);
-					
-					if($comparador1 === 'ilike'){
-						
-						$registros = $registros->whereRaw($function."($columna_selected1::text) ilike ".$function."('%".$busqueda."%')");
-						
-					}else{
-						
-						$registros = $registros->where($columna_selected1,$comparador1,$busqueda);
-						
-					}
-					
-				}
+				/*-----------------------------------------------------*/
 				
-				$caracteres_raros = NULL;
+				$registros = $this->paginacion($registros,$request);
 				
-				if(isset($request->where1) && isset($request->caracteres_raros)){
-					
-					if($request->comparador1 === 'ilike'){
-					
-						$conexion->unprepared('DROP FUNCTION '.$function.'(text)');
-						
-					}
-					
-					$caracteres_raros = 'S';
-					
-				}
+				//print_r($registros); exit;
 				
-				if($charset_def != 'UTF8'){
-					
-					$where1 = utf8_encode($where1);
-						
-				}
-				
-				$count_registros = count($registros->get());
-				
-				Cache::put('registros',$registros,3600);
-				
-				Cache::put('count_registros',$count_registros,3600);
 				
 				/*--------------- Acá termina el if del cache -----------------*/
 				
-				$registros = $registros->orderBy(DB::raw($col_string))->paginate(8);
+				//$registros = $registros->orderBy(DB::raw($col_string))->paginate(8);
 				
 				return view('home',['database' => $database,
 									'schema' => $schema,
@@ -481,7 +535,7 @@ class HomeController extends Controller
 									'charset_def' => $charset_def,
 									'count_registros' => $count_registros,
 									'sort' => $sort,
-									'ordercol_def' => $request->ordercol,
+									'ordercol_def' => $ordercol,
 									'caracteres_raros' => $caracteres_raros]);
 				
 			}else{
@@ -693,7 +747,7 @@ class HomeController extends Controller
 				
 			}else{
 				
-				return back()->withInput()->with('registro_no_modificado', 'No se puede borrar el registro de '.$tabla_selected.' porque hay valores repetidos en la columna '.$primera_columna.' usada como primary key por la aplicación.');
+				return back()->withInput()->with('registro_no_modificado', 'No se puede borrar el registro de la tabla '.$tabla_selected.' porque hay valores repetidos en la columna '.$primera_columna.' usada como primary key por la aplicación.');
 				
 			}
 		
