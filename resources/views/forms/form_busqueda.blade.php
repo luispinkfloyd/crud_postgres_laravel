@@ -51,7 +51,7 @@
         </div>
         <div class="col-sm-2 form-group">
         	<button type="submit" class="btn btn-primary">Buscar</button>&nbsp;
-            <?php echo '<input type="button" class="btn btn-danger" value="Limpiar" onclick="javascript:location.href='."'tabla?ordercol=".$ordercol_def."&database=".$database."&schema=".$schema."&tabla_selected=".$tabla_selected."&sort=".$sort."';".'"/>';
+            <?php echo '<input type="button" class="btn btn-danger" value="Limpiar" onclick="javascript:location.href='."'tabla?ordercol=".$ordercol_def."&limpiar=1&database=".$database."&schema=".$schema."&tabla_selected=".$tabla_selected."&sort=".$sort."';".'"/>';
 			?> 
         </div>
     </div>

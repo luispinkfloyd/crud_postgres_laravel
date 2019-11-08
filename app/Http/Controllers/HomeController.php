@@ -232,6 +232,12 @@ class HomeController extends Controller
 				
 				ini_set('memory_limit', -1);
 				
+				if(isset($request->limpiar)){
+					
+					Cache::forget('tabla_selected');
+					
+				}
+				
 				if(Cache::get('tabla_selected') != $request->tabla_selected
 				|| Cache::get('columna_selected1') != $request->columna_selected1
 				|| Cache::get('comparador1') != $request->comparador1
@@ -684,6 +690,8 @@ class HomeController extends Controller
 			
 			$conexion->insert('insert into '.$tabla_selected.' ('.$columnas_registro.') values ('.$insert.');');
 			
+			Cache::forget('tabla_selected');
+			
 			return back()->withInput()->with('registro_agregado', 'El registro se agregó correctamente');
 			
 		}
@@ -738,6 +746,8 @@ class HomeController extends Controller
 												  
 			
 			$valores_repetidos_primera_columna = $conexion->select($sql_valores_repetidos_primera_columna);
+			
+			Cache::forget('tabla_selected');
 			
 			if(count($valores_repetidos_primera_columna) === 0){
 			
@@ -887,10 +897,13 @@ class HomeController extends Controller
 					return back()->withInput()->with('registro_no_modificado', 'Nada fue modificado.');
 					
 				}else{
+					
+					Cache::forget('tabla_selected');
 				
 					return back()->withInput()->with('registro_actualizado', 'El registro se actualizó correctamente (campos modificados = '.$count_modificaciones.').');
 					
 				}
+				
 			}else{
 				
 				return back()->withInput()->with('registro_no_modificado', 'No se puede modificar '.$tabla_selected.' porque hay valores repetidos en la columna '.$primera_columna.' usada como primary key por la aplicación.');
