@@ -238,11 +238,22 @@ class HomeController extends Controller
 					
 				}
 				
+				if(Cache::get('tabla_selected') != $request->tabla_selected){
+						
+					Cache::forget('columna_selected1');
+					Cache::forget('comparador1');
+					Cache::forget('where1');
+					Cache::forget('ordercol');
+
+				}
+				
 				if(Cache::get('tabla_selected') != $request->tabla_selected
 				|| Cache::get('columna_selected1') != $request->columna_selected1
 				|| Cache::get('comparador1') != $request->comparador1
 				|| Cache::get('where1') != $request->where1
 				|| Cache::get('ordercol') != $request->ordercol){
+					
+					//print_r($request->all());
 					
 					$database = $request->database;
 				
