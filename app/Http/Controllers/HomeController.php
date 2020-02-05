@@ -885,7 +885,7 @@ class HomeController extends Controller
 						  
 						}
 						
-						$sql_select_columna = "select $columna_registro::text as $columna_registro from $tabla_selected where ($primera_columna)::text = ($id)::text";
+						$sql_select_columna = "select $columna_registro::text as $columna_registro from $tabla_selected where ($primera_columna)::text = '$id'";
 						
 						$select_columna = $conexion->select($sql_select_columna);
 						
@@ -893,7 +893,7 @@ class HomeController extends Controller
 						
 						if( $select_columna !== $request->$columna_registro){
 							
-							$conexion->update('update '.$tabla_selected.' set '.$columna_registro.' = '.$update.' where ('.$primera_columna.')::text = ('.$id.')::text;');
+							$conexion->update('update '.$tabla_selected.' set '.$columna_registro.' = '.$update.' where ('.$primera_columna.")::text = '".$id."';");
 							
 							$count_modificaciones++;
 							
