@@ -27,6 +27,7 @@ class HomeController extends Controller
 	
 	public function paginacion($array, $request)
 	{
+		
 		$page = Input::get('page', 1);
 		
 		$perPage = 5;
@@ -231,6 +232,7 @@ class HomeController extends Controller
 			if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
 				
 				ini_set('memory_limit', -1);
+				set_time_limit(500);
 				
 				if(isset($request->limpiar)){
 					
