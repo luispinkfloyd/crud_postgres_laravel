@@ -27,6 +27,7 @@ class HomeController extends Controller
 
 	public function paginacion($array, $request)
 	{
+		
 		$page = Input::get('page', 1);
 
 		$perPage = 5;
@@ -236,7 +237,8 @@ class HomeController extends Controller
 			if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
 
 				ini_set('memory_limit', -1);
-
+				set_time_limit(500);
+				
 				if(isset($request->limpiar)){
 
 					Cache::forget('tabla_selected');
@@ -892,7 +894,7 @@ class HomeController extends Controller
 						}
 
 						$sql_select_columna = "select $columna_registro::text as $columna_registro from $tabla_selected where ($primera_columna)::text = ($id)::text";
-
+						
 						$select_columna = $conexion->select($sql_select_columna);
 
 						$select_columna = $select_columna[0]->$columna_registro;
@@ -900,7 +902,7 @@ class HomeController extends Controller
 						if( $select_columna !== $request->$columna_registro){
 
 							$conexion->update('update '.$tabla_selected.' set '.$columna_registro.' = '.$update.' where ('.$primera_columna.')::text = ('.$id.')::text;');
-
+							
 							$count_modificaciones++;
 
 						}
