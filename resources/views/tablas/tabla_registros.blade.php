@@ -29,7 +29,7 @@
 	.modal .btn {
 		border-radius: 2px;
 		min-width: 100px;
-	}	
+	}
 	.modal form label {
 		font-weight: normal;
 	}
@@ -86,7 +86,7 @@
             <th scope="col"></th>
             @foreach($columnas as $columna)
                 <th scope="col">{{$columna->column_name}}
-                    <form method="get" action="{{route('tabla')}}" style="display:inline-block">
+                    <form method="get" action="{{route('tabla')}}" style="display:inline-block;">
                         <input type="hidden" name="ordercol" value="{{$ordercol}}">
                         <input type="hidden" name="database" value="{{$database}}">
                         <input type="hidden" name="schema" value="{{$schema}}">
@@ -97,12 +97,13 @@
                             <input type="hidden" name="where1" value="{{$where1}}">
                         @endif
                         <input type="hidden" name="sort" value="asc">
-                        <button type="submit" class="btn btn-sm btn-info">
-                            <i class="material-icons" style="font-size:9px;padding:-2px"><b>import_export</b></i>
-                            <span><small>Asc</small></span>
+                        <button type="submit" class="btn btn-sm btn-link" style="padding-top:0; padding-bottom:0; padding-right:0; padding-left:0;">
+													  <img src="{{ asset('img/arriba.png')}}" height="14">
+                            {{-- <i class="material-icons" style="font-size:9px;padding:-2px"><b>import_export</b></i>
+                            <span><small>Asc</small></span> --}}
                         </button>
                     </form>
-                    <form method="get" action="{{route('tabla')}}" style="display:inline-block">
+                    <form method="get" action="{{route('tabla')}}" style="display:inline-block;">
                         <input type="hidden" name="ordercol" value="{{$ordercol}}">
                         <input type="hidden" name="database" value="{{$database}}">
                         <input type="hidden" name="schema" value="{{$schema}}">
@@ -113,9 +114,10 @@
                             <input type="hidden" name="where1" value="{{$where1}}">
                         @endif
                         <input type="hidden" name="sort" value="desc">
-                        <button type="submit" class="btn btn-sm btn-info">
-                            <i class="material-icons" style="font-size:9px;padding:-2px"><b>import_export</b></i>
-                            <span><small>Desc</small></span>
+                        <button type="submit" class="btn btn-sm btn-link" style="padding-top:0; padding-bottom:0; padding-right:0; padding-left:0;">
+													  <img src="{{ asset('img/abajo.png')}}" height="14">
+                            {{-- <i class="material-icons" style="font-size:9px;padding:-2px"><b>import_export</b></i>
+                            <span><small>Desc</small></span> --}}
                         </button>
                     </form>
                     <br>
@@ -130,11 +132,11 @@
                 <tr>
                 <?php
 				foreach($columnas as $columna){
-				
+
 					$primera_columna = $columna->column_name;
-					
+
 					break;
-				
+
 				}
 				?>
                 <td>
@@ -142,20 +144,20 @@
                     <a href="#editModal<?php echo str_replace('.','_',$registro->$primera_columna); ?>" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Editar">edit</i></a>
                 </td>
                       @foreach($columnas as $columna)
-                          <?php 
+                          <?php
                               $columna_registro = $columna->column_name;
                           ?>
-                          
+
                           	  @if($charset_def !== 'UTF8')
-                          
+
                               	<td>{{utf8_encode($registro->$columna_registro)}}</td>
-                              
+
                               @else
-                              
+
                               	<td>{{$registro->$columna_registro}}</td>
-                              
+
                               @endif
-                               
+
                       @endforeach
                   </tr>
             @empty

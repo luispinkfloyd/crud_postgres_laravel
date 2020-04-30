@@ -14,7 +14,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="columna_span">Columna</span>
                 </div>
-                <select class="custom-select" name="columna_selected1" required>
+                <select class="custom-select" name="columna_selected1" id="columna_selected1" onChange="select_columna()" required>
                     <option disabled selected value>--Seleccione--</option>
                     @foreach($columnas as $columna)
                         <option <?php if(isset($columna_selected1)) if($columna_selected1 === $columna->column_name) echo 'selected';?>>{{$columna->column_name}}</option>
@@ -40,7 +40,9 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="where1_span">Parámetro</span>
                 </div>
-                <input type="text" name="where1" class="form-control" placeholder="Parámetro de búsqueda..." required <?php if(isset($where1)) echo 'value="'.$where1.'"';?>>
+                <input type="text" name="where1" list="where1_datalist" autocomplete="off" class="form-control" placeholder="Parámetro de búsqueda..." required <?php if(isset($where1)) echo 'value="'.$where1.'"';?>>
+				<datalist id="where1_datalist">
+				</datalist>
             </div>
         </div>
         <div class="col-sm-1 form-group">
@@ -61,7 +63,42 @@
  
  <script type="text/javascript">
  
- 
+ 	function select_columna(){
+		
+		$('#where1_datalist').empty();
+		
+		var consulta;
+
+        //hacemos focus al campo de búsqueda
+        $("#columna_selected1").focus();
+
+        //obtenemos el texto introducido en el campo de búsqueda
+        consulta = $("#columna_selected1").val();
+		
+		
+		//alert(consulta)
+
+        //hace la búsqueda
+
+        $.ajax({
+              type: "GET",
+              url: "{{ route('ajax_columna')}}",
+              data: "columna="+consulta,
+              dataType: "json",
+              error: function(){
+                    alert("error petición ajax");
+              },
+              success: function(result){
+
+                  $.each( result, function(k,v) {
+					  
+                        $('#where1_datalist').append($('<option>', {text:v}));
+                  });
+
+              }
+        });
+		
+	}
  
  </script>
  

@@ -37,3 +37,5 @@ Route::get('/edit/{id}', 'HomeController@edit')->name('home.edit');
 
 Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
 
+Route::get('/ajax_columna','AjaxController@ajax_columna')->name('ajax_columna');
+
