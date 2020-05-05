@@ -159,7 +159,18 @@ class HomeController extends Controller
 			$charset = $charset_registro[0]->server_encoding;
 
 			$request->session()->put('charset_def',$charset);
-
+			
+			//Si sólo existe un schema, me salteo la vista para seleccionar el schema y voy directo a la consulta con los valores del schema mismo y la base de datos.
+			if(count($schemas) == 1){
+				
+				$request->session()->put('schema',$schemas[0]->schema_name);
+				
+				$request->session()->put('database',$database);
+				
+				return redirect()->route('schema');
+				
+			}
+			
 			//Retorno al home con los datos de las consultas
 			return view('home',['database' => $database,'schemas' => $schemas,'db_usuario' => $db_usuario,'db_host' => $db_host]);
 
@@ -179,9 +190,19 @@ class HomeController extends Controller
 		if($request->session()->get('db_usuario') !== NULL && $request->session()->get('db_host') !== NULL){
 
 			//Traigo los inputs session y la base de datos seleccionada más el schema seleccionado en el form_schema
-			$database = $request->database;
-
-			$schema = $request->schema;
+			if(isset($request->database) && isset($request->schema)){
+				
+				$database = $request->database;
+				
+				$schema = $request->schema;
+				
+			}else{
+				
+				$schema = $request->session()->get('schema');
+				
+				$database = $request->session()->get('database');
+				
+			}
 
 			$db_usuario = $request->session()->get('db_usuario');
 
