@@ -15,13 +15,22 @@
 @if(isset($where1))
 <table>
 	<tr>
-    	<td>Columna:</td><td style="color: #2A267C">{{$columna_selected1}}</td>
+    	<td>Columna1:</td><td style="color: #2A267C">{{$columna_selected1}}</td>
+		@if(isset($where2))
+			<td>Columna2:</td><td style="color: #2A267C">{{$columna_selected2}}</td>
+		@endif
     </tr>
     <tr>
-        <td>Comparador:</td><td style="color: #2A267C">{{$comparador1}}</td>
+        <td>Comparador1:</td><td style="color: #2A267C">{{$comparador1}}</td>
+		@if(isset($where2))
+			<td>Comparador2:</td><td style="color: #2A267C">{{$comparador2}}</td>
+		@endif
     </tr>
     <tr>
-        <td>Parámetro:</td><td style="color: #2A267C">{{$where1}}</td>
+        <td>Parámetro1:</td><td style="color: #2A267C">{{$where1}}</td>
+		@if(isset($where2))
+			<td>Parámetro2:</td><td style="color: #2A267C">{{$where2}}</td>
+		@endif
     </tr>
     
 </table>

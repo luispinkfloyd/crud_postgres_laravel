@@ -96,6 +96,12 @@ class ExcelExport implements FromView , ShouldAutoSize , WithEvents
 		$columna_selected1 = NULL;
 
 		$where1 = NULL;
+		
+		$comparador2 = NULL;
+
+		$columna_selected2 = NULL;
+
+		$where2 = NULL;
 
 		$sql="select column_name
 					,is_nullable as required
@@ -170,6 +176,28 @@ class ExcelExport implements FromView , ShouldAutoSize , WithEvents
 			}
 
 		}
+		
+		if(isset($this->request->where2)){
+
+			$comparador2 = $this->request->comparador2;
+
+			$columna_selected2 = $this->request->columna_selected2;
+
+			$where2 = $this->request->where2;
+
+			$busqueda2 = str_replace("´`'çÇ¨",'_',$where2);
+
+			if($comparador2 === 'ilike'){
+
+				$registros = $registros->whereRaw($function."($columna_selected2::text) ilike ".$function."('%".$busqueda2."%')");
+
+			}else{
+
+				$registros = $registros->where($columna_selected2,$comparador2,$busqueda2);
+
+			}
+
+		}
 
 		$registros = $registros->orderBy(DB::raw($col_string))->get();
 
@@ -192,6 +220,9 @@ class ExcelExport implements FromView , ShouldAutoSize , WithEvents
 										   ,'columna_selected1' => $columna_selected1
 										   ,'comparador1' => $comparador1
 										   ,'where1' => $where1
+										   ,'columna_selected2' => $columna_selected2
+										   ,'comparador2' => $comparador2
+										   ,'where2' => $where2
 										   ,'registros' => $registros
 										   ,'columnas' => $columnas
 										   ,'charset_def' => $charset_def]);
@@ -236,8 +267,18 @@ class ExcelExport implements FromView , ShouldAutoSize , WithEvents
 					
 					$primera_celda_registros = 'A10:';
 					
+					if(isset($this->request->where2)){
+						
+						$ultima_celda_columnas = 'D8';
+						
+					}else{
+						
+						$ultima_celda_columnas = 'B8';
+						
+					}
+					
 					$event->sheet->getStyle(
-						'A6:B8'
+						'A6:'.$ultima_celda_columnas
 					)->applyFromArray($styleBotones)->getFont()->setBold(true)->setName('Calibri')->setSize($font_size);
 					
 				}else{

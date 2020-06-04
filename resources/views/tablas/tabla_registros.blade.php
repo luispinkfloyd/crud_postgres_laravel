@@ -47,6 +47,11 @@
 </style>
 
 @endsection
+
+@if(isset($tabla_selected))
+@section('titulo', $tabla_selected.' - ')
+@endif
+
 @include('forms.form_busqueda')
 @include('tablas.alerts_table')
 <div class="table-responsive tabla-resultados borde">
@@ -64,6 +69,11 @@
                     <input type="hidden" name="columna_selected1" value="{{$columna_selected1}}">
                     <input type="hidden" name="comparador1" value="{{$comparador1}}">
                     <input type="hidden" name="where1" value="{{$where1}}">
+                @endif
+				@if(isset($where2))
+                    <input type="hidden" name="columna_selected2" value="{{$columna_selected2}}">
+                    <input type="hidden" name="comparador2" value="{{$comparador2}}">
+                    <input type="hidden" name="where2" value="{{$where2}}">
                 @endif
                 @if(isset($sort))
                     <input type="hidden" name="sort" value="{{$sort}}">

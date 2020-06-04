@@ -45,6 +45,12 @@ class HomeController extends Controller
 		//Primero limpia el cache y retorna la vista con el formulario para conectarse al host
 
 		Cache::flush();
+		
+		session()->forget('db_usuario');
+		
+		session()->forget('db_host');
+		
+		session()->forget('db_contrasenia');
 
 		return view('home');
 
@@ -251,7 +257,7 @@ class HomeController extends Controller
 		try
 		{
 
-			if($request->tabla_selected === NULL){ return back()->withInput('mensaje_error','Selección de tabla vacía');}
+			if($request->tabla_selected == '' || $request->tabla_selected == NULL){ return back()->withInput('mensaje_error','Selección de tabla vacía');}
 
 
 
@@ -271,6 +277,9 @@ class HomeController extends Controller
 					Cache::forget('columna_selected1');
 					Cache::forget('comparador1');
 					Cache::forget('where1');
+					Cache::forget('columna_selected2');
+					Cache::forget('comparador2');
+					Cache::forget('where2');
 					Cache::forget('ordercol');
 
 				}
@@ -279,8 +288,11 @@ class HomeController extends Controller
 				|| Cache::get('columna_selected1') != $request->columna_selected1
 				|| Cache::get('comparador1') != $request->comparador1
 				|| Cache::get('where1') != $request->where1
+				|| Cache::get('columna_selected2') != $request->columna_selected2
+				|| Cache::get('comparador2') != $request->comparador2
+				|| Cache::get('where2') != $request->where2
 				|| Cache::get('ordercol') != $request->ordercol
-        || Cache::get('sort') != $request->sort){
+                || Cache::get('sort') != $request->sort){
 
 					//print_r($request->all());
 
@@ -326,7 +338,7 @@ class HomeController extends Controller
 
 						Cache::put('caracteres_raros',$request->caracteres_raros,3600);
 
-						$function = 'f_limpiar_acentos_'.$db_usuario.'_'.$database.'_'.$schema;
+						$function = 'public.f_limpiar_acentos_'.$db_usuario.'_'.$database.'_'.$schema;
 
 					}else{
 
@@ -353,6 +365,8 @@ class HomeController extends Controller
 						if($request->comparador1 === 'ilike'){
 
 							$conexion->unprepared("CREATE OR REPLACE FUNCTION ".$function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
+							
+							//echo 'Llegué hasta acá bien'; exit;
 
 						}
 
@@ -382,6 +396,12 @@ class HomeController extends Controller
 					$columna_selected1 = NULL;
 
 					$where1 = NULL;
+					
+					$comparador2 = NULL;
+
+					$columna_selected2 = NULL;
+
+					$where2 = NULL;
 
 					$sql="select column_name
 								,is_nullable as required
@@ -487,9 +507,66 @@ class HomeController extends Controller
 						}
 
 					}
+					
+					if(isset($request->where2)){
+
+						Cache::forget('where2');
+
+						Cache::put('where2',$request->where2,3600);
+
+						$comparador2 = $request->comparador2;
+
+						Cache::forget('comparador2');
+
+						Cache::put('comparador2',$comparador2,3600);
+
+						$columna_selected2 = $request->columna_selected2;
+
+						Cache::forget('columna_selected2');
+
+						Cache::put('columna_selected2',$columna_selected2,3600);
+
+						if($charset_def != 'UTF8'){
+
+							$where2 = utf8_decode($request->where2);
+
+						}else{
+
+							$where2 = $request->where2;
+						}
+
+						$busqueda2 = str_replace("´`'çÇ¨",'_',$where2);
+
+						if($comparador2 === 'ilike'){
+
+							$registros = $registros->whereRaw($function."($columna_selected2::text) ilike ".$function."('%".$busqueda2."%')");
+
+						}else{
+
+							$registros = $registros->where($columna_selected2,$comparador2,$busqueda2);
+
+						}
+
+					}
 
 					$caracteres_raros = NULL;
 
+					if($charset_def != 'UTF8'){
+
+						$where1 = utf8_encode($where1);
+						
+						if(isset($request->where2)){
+							
+							$where2 = utf8_encode($where2);
+							
+						}
+
+					}
+
+					$count_registros = count($registros->get());
+
+					$registros = $registros->orderBy(DB::raw($col_string))->get()->toArray();
+					
 					if(isset($request->where1) && isset($request->caracteres_raros)){
 
 						if($request->comparador1 === 'ilike'){
@@ -501,16 +578,6 @@ class HomeController extends Controller
 						$caracteres_raros = 'S';
 
 					}
-
-					if($charset_def != 'UTF8'){
-
-						$where1 = utf8_encode($where1);
-
-					}
-
-					$count_registros = count($registros->get());
-
-					$registros = $registros->orderBy(DB::raw($col_string))->get()->toArray();
 
 					Cache::forget('registros');
 
@@ -533,6 +600,8 @@ class HomeController extends Controller
 					$schema = Cache::get('schema');
 
 					$where1 = Cache::get('where1');
+					
+					$where2 = Cache::get('where2');
 
 					$caracteres_raros = Cache::get('caracteres_raros');
 
@@ -543,6 +612,10 @@ class HomeController extends Controller
 					$comparador1 = Cache::get('comparador1');
 
 					$columna_selected1 = Cache::get('columna_selected1');
+					
+					$comparador2 = Cache::get('comparador2');
+
+					$columna_selected2 = Cache::get('columna_selected2');
 
 					$sort = Cache::get('sort');
 
@@ -578,6 +651,9 @@ class HomeController extends Controller
 									'comparador1' => $comparador1,
 									'columna_selected1' => $columna_selected1,
 									'where1' => $where1,
+									'comparador2' => $comparador2,
+									'columna_selected2' => $columna_selected2,
+									'where2' => $where2,
 									'charset_def' => $charset_def,
 									'count_registros' => $count_registros,
 									'sort' => $sort,

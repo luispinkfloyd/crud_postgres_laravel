@@ -9,7 +9,7 @@
 	
 	<link rel="icon" href="{!! asset('img/database.ico') !!}"/>
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>@yield('titulo'){{ config('app.name', 'Laravel') }}</title>
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
@@ -84,5 +84,12 @@
         </main>
     </div>
     @yield('script')
+	<script type="text/javascript">
+	
+		$(function () {
+		  $('[data-toggle="tooltip"]').tooltip()
+		})
+		
+	</script>
 </body>
 </html>
