@@ -27,7 +27,7 @@ class HomeController extends Controller
 
 	public function paginacion($array, $request)
 	{
-		
+
 		$page = Input::get('page', 1);
 
 		$perPage = 5;
@@ -45,11 +45,11 @@ class HomeController extends Controller
 		//Primero limpia el cache y retorna la vista con el formulario para conectarse al host
 
 		Cache::flush();
-		
+
 		session()->forget('db_usuario');
-		
+
 		session()->forget('db_host');
-		
+
 		session()->forget('db_contrasenia');
 
 		return view('home');
@@ -65,15 +65,15 @@ class HomeController extends Controller
 
 
 			//Guardo el host, usuario y contraseña definidos en el form_host para hacer la conexión, en variables de sesión; mientras dure la sesión y no se modifiquen, la conexión siempre se va a realizar con estos valores (agregado el if para los casos de querer volver a seleccionar la database sin salirse de la conexión)
-			
+
 			if($request->session()->get('db_usuario') === NULL && $request->session()->get('db_host') === NULL){
-			
+
 				$request->session()->put('db_host',$request->db_host);
 
 				$request->session()->put('db_usuario',$request->db_usuario);
 
 				$request->session()->put('db_contrasenia',$request->db_contrasenia);
-				
+
 			}
 
 			//Traigo los valores de la conexión para manejarlos como variantes directamente (menos la contraseña)
@@ -165,18 +165,18 @@ class HomeController extends Controller
 			$charset = $charset_registro[0]->server_encoding;
 
 			$request->session()->put('charset_def',$charset);
-			
+
 			//Si sólo existe un schema, me salteo la vista para seleccionar el schema y voy directo a la consulta con los valores del schema mismo y la base de datos.
 			if(count($schemas) == 1){
-				
+
 				$request->session()->put('schema',$schemas[0]->schema_name);
-				
+
 				$request->session()->put('database',$database);
-				
+
 				return redirect()->route('schema');
-				
+
 			}
-			
+
 			//Retorno al home con los datos de las consultas
 			return view('home',['database' => $database,'schemas' => $schemas,'db_usuario' => $db_usuario,'db_host' => $db_host]);
 
@@ -197,17 +197,17 @@ class HomeController extends Controller
 
 			//Traigo los inputs session y la base de datos seleccionada más el schema seleccionado en el form_schema
 			if(isset($request->database) && isset($request->schema)){
-				
+
 				$database = $request->database;
-				
+
 				$schema = $request->schema;
-				
+
 			}else{
-				
+
 				$schema = $request->session()->get('schema');
-				
+
 				$database = $request->session()->get('database');
-				
+
 			}
 
 			$db_usuario = $request->session()->get('db_usuario');
@@ -265,7 +265,7 @@ class HomeController extends Controller
 
 				ini_set('memory_limit', -1);
 				set_time_limit(500);
-				
+
 				if(isset($request->limpiar)){
 
 					Cache::forget('tabla_selected');
@@ -280,7 +280,8 @@ class HomeController extends Controller
 					Cache::forget('columna_selected2');
 					Cache::forget('comparador2');
 					Cache::forget('where2');
-					Cache::forget('ordercol');
+                    Cache::forget('ordercol');
+                    Cache::forget('tabla_selected');
 
 				}
 
@@ -292,7 +293,8 @@ class HomeController extends Controller
 				|| Cache::get('comparador2') != $request->comparador2
 				|| Cache::get('where2') != $request->where2
 				|| Cache::get('ordercol') != $request->ordercol
-                || Cache::get('sort') != $request->sort){
+                || Cache::get('sort') != $request->sort
+                || Cache::get('database') != $request->database){
 
 					//print_r($request->all());
 
@@ -365,7 +367,7 @@ class HomeController extends Controller
 						if($request->comparador1 === 'ilike'){
 
 							$conexion->unprepared("CREATE OR REPLACE FUNCTION ".$function."(text) RETURNS text AS \$BODY$ SELECT translate($1,'".$originales."','".$modificadas."'); \$BODY$ LANGUAGE sql IMMUTABLE STRICT COST 100");
-							
+
 							//echo 'Llegué hasta acá bien'; exit;
 
 						}
@@ -396,7 +398,7 @@ class HomeController extends Controller
 					$columna_selected1 = NULL;
 
 					$where1 = NULL;
-					
+
 					$comparador2 = NULL;
 
 					$columna_selected2 = NULL;
@@ -507,7 +509,7 @@ class HomeController extends Controller
 						}
 
 					}
-					
+
 					if(isset($request->where2)){
 
 						Cache::forget('where2');
@@ -554,11 +556,11 @@ class HomeController extends Controller
 					if($charset_def != 'UTF8'){
 
 						$where1 = utf8_encode($where1);
-						
+
 						if(isset($request->where2)){
-							
+
 							$where2 = utf8_encode($where2);
-							
+
 						}
 
 					}
@@ -566,7 +568,7 @@ class HomeController extends Controller
 					$count_registros = count($registros->get());
 
 					$registros = $registros->orderBy(DB::raw($col_string))->get()->toArray();
-					
+
 					if(isset($request->where1) && isset($request->caracteres_raros)){
 
 						if($request->comparador1 === 'ilike'){
@@ -600,7 +602,7 @@ class HomeController extends Controller
 					$schema = Cache::get('schema');
 
 					$where1 = Cache::get('where1');
-					
+
 					$where2 = Cache::get('where2');
 
 					$caracteres_raros = Cache::get('caracteres_raros');
@@ -612,7 +614,7 @@ class HomeController extends Controller
 					$comparador1 = Cache::get('comparador1');
 
 					$columna_selected1 = Cache::get('columna_selected1');
-					
+
 					$comparador2 = Cache::get('comparador2');
 
 					$columna_selected2 = Cache::get('columna_selected2');
@@ -931,10 +933,6 @@ class HomeController extends Controller
 
 			$columnas = $conexion->select($sql);
 
-			$insert = '';
-
-			$columnas_registro = '';
-
 			foreach($columnas as $columna){
 
 				$primera_columna = $columna->column_name;
@@ -988,18 +986,22 @@ class HomeController extends Controller
 
 							}
 
-						}
+                        }
 
-						$sql_select_columna = "select $columna_registro::text as $columna_registro from $tabla_selected where ($primera_columna)::text = ($id)::text";
-						
-						$select_columna = $conexion->select($sql_select_columna);
+						$sql_select_columna = "select $columna_registro::text as $columna_registro from $tabla_selected where ($primera_columna)::text = ('".$id."')::text;";
+
+                        $select_columna = $conexion->select($sql_select_columna);
+
+                        //print_r($select_columna);
+                        //print_r($sql_select_columna);
+                        //exit;
 
 						$select_columna = $select_columna[0]->$columna_registro;
 
 						if( $select_columna !== $request->$columna_registro){
 
-							$conexion->update('update '.$tabla_selected.' set '.$columna_registro.' = '.$update.' where ('.$primera_columna.')::text = ('.$id.')::text;');
-							
+							$conexion->update('update '.$tabla_selected.' set '.$columna_registro.' = '.$update.' where ('.$primera_columna.")::text = ('".$id."')::text;");
+
 							$count_modificaciones++;
 
 						}

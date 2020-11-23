@@ -26,10 +26,11 @@
 	.cartel-host{
 		max-width:50%;
 		margin:auto;
-		margin-bottom:5px;
-		padding:1px;
+		margin-bottom:2px;
+		padding:2px;
 		border:#1F5B20 1px solid;
 		border-radius:3px;
+        max-height: 50px;
 	}
 	.cartel-error{
 		max-width:50%;
@@ -39,11 +40,20 @@
 	}
 	.div-paginacion{
 		min-width:90%;
-		margin:10px auto;
-		text-align:right;
+		margin-top:10px auto;
 	}
 	.borde{
 		border:#888888 solid 1px;
+	}
+    .borde-top{
+		border:#888888 solid 1px;
+        border-top: none;
+        border-radius: 0px 0px 5px 5px;
+	}
+    .borde-bottom{
+		border:#888888 solid 1px;
+        border-bottom: none;
+        border-radius: 5px 5px 0px 0px;
 	}
 </style>
 @endsection
@@ -62,37 +72,44 @@
 @if(isset($db_host) && isset($db_usuario))
 
 	<div class="alert-success cartel-host" align="center">
-    	<p><h4><b><small>Host:</small>{{$db_host}} <small>Usuario:</small>{{$db_usuario}} <a class="btn btn-info" href="{{ url('/') }}">Volver a seleccionar todo</a></b></h4></p>
+        <div class="row">
+            <div class="col-7 mt-1" align="right">
+                <h5><b><small>Host:</small>{{$db_host}} <small>Usuario:</small>{{$db_usuario}}</b></h5>
+            </div>
+            <div class="col" align="left">
+                <a class="btn btn-sm btn-info" href="{{ url('/') }}">Volver a seleccionar todo</a>
+            </div>
+        </div>
     </div>
-	
+
 @endif
 
 
 @if(isset($bases))
 
     @include('forms.form_database')
-    
+
 @elseif(isset($database) && !isset($schema))
 
 	@include('forms.form_schema')
-    
+
 @elseif(isset($schema))
 
 	@include('forms.form_tabla')
-    
+
 	@if(isset($registros))
-		
+
         @include('tablas.tabla_registros')
         @include('modals.modal_create')
         @include('modals.modal_delete')
         @include('modals.modal_edit')
-        
+
     @endif
 
 @else
 
     @include('forms.form_host')
-    
+
 @endif
 
 @endsection

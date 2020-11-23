@@ -54,7 +54,7 @@
 
 @include('forms.form_busqueda')
 @include('tablas.alerts_table')
-<div class="table-responsive tabla-resultados borde">
+<div class="tabla-resultados borde-bottom" style="margin-bottom: 0px">
     <div class="row">
     	<div class="col" align="right">
         	<a href="#addModal" class="btn btn-primary" data-toggle="modal" style="margin:2px;"><i class="material-icons" style="float:left;padding-right:5px;">add</i><span>Añadir Registro</span></a>
@@ -90,6 +90,8 @@
         </div>
     </div>
     <?php $ordercol = 1; ?>
+</div>
+<div class="table-responsive tabla-resultados borde-top" style="margin-top: 0px">
     <table class="table table-sm table-bordered table-striped table-hover">
         <thead>
             <tr>
