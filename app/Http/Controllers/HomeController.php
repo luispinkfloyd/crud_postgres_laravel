@@ -469,7 +469,7 @@ class HomeController extends Controller
 
 					Cache::put('ordercol',$request->ordercol,3600);
 
-					if(isset($request->where1)){
+					if(isset($request->columna_selected1)){
 
 						Cache::forget('where1');
 
@@ -502,7 +502,15 @@ class HomeController extends Controller
 
 							$registros = $registros->whereRaw($function."($columna_selected1::text) ilike ".$function."('%".$busqueda."%')");
 
-						}else{
+						}elseif($comparador1 === 'is_null'){
+
+                            $registros = $registros->whereRaw("$columna_selected1 is null");
+
+                        }elseif($comparador1 === 'not_null'){
+
+                            $registros = $registros->whereRaw("$columna_selected1 is not null");
+
+                        }else{
 
 							$registros = $registros->where($columna_selected1,$comparador1,$busqueda);
 
@@ -510,7 +518,7 @@ class HomeController extends Controller
 
 					}
 
-					if(isset($request->where2)){
+					if(isset($request->columna_selected2)){
 
 						Cache::forget('where2');
 
@@ -543,7 +551,15 @@ class HomeController extends Controller
 
 							$registros = $registros->whereRaw($function."($columna_selected2::text) ilike ".$function."('%".$busqueda2."%')");
 
-						}else{
+                        }elseif($comparador2 === 'is_null'){
+
+                            $registros = $registros->whereRaw("$columna_selected2 is null");
+
+                        }elseif($comparador2 === 'not_null'){
+
+                            $registros = $registros->whereRaw("$columna_selected2 is not null");
+
+                        }else{
 
 							$registros = $registros->where($columna_selected2,$comparador2,$busqueda2);
 

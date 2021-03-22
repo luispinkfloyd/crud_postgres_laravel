@@ -28,9 +28,12 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="comparador_span">Comparador</span>
                 </div>
-                <select class="custom-select" name="comparador1" required>
+                <select class="custom-select" name="comparador1" onchange="where_null()" id="comparador1" required>
                 	<option value="ilike" <?php if(isset($comparador1)) if($comparador1 === 'ilike') echo 'selected';?>>Contiene</option>
                     <option value="=" <?php if(isset($comparador1)) if($comparador1 === '=') echo 'selected';?>>Igual</option>
+                    <option value="<>" <?php if(isset($comparador1)) if($comparador1 === '<>') echo 'selected';?>>Distinto</option>
+                    <option value="is_null" <?php if(isset($comparador1)) if($comparador1 === 'is_null') echo 'selected';?>>Is Null</option>
+                    <option value="not_null" <?php if(isset($comparador1)) if($comparador1 === 'not_null') echo 'selected';?>>Is Not Null</option>
                     <option value=">=" <?php if(isset($comparador1)) if($comparador1 === '>=') echo 'selected';?>>Mayor o Igual</option>
                     <option value="<=" <?php if(isset($comparador1)) if($comparador1 === '<=') echo 'selected';?>>Menor o Igual</option>
                 </select>
@@ -41,7 +44,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="where1_span">Parámetro</span>
                 </div>
-                <input type="text" name="where1" list="where1_datalist" autocomplete="off" class="form-control" placeholder="Parámetro de búsqueda..." required <?php if(isset($where1)) echo 'value="'.$where1.'"';?>>
+                <input type="text" name="where1" id="where1" list="where1_datalist" autocomplete="off" class="form-control" placeholder="Parámetro de búsqueda..." @if(isset($comparador1)) @if($comparador1 == 'is_null' || $comparador1 == 'not_null') {{'disabled'}} @else {{'required'}} @endif @endif <?php if(isset($where1)) echo 'value="'.$where1.'"';?>>
 				<datalist id="where1_datalist">
 				</datalist>
             </div>
@@ -85,6 +88,7 @@
                 <select class="custom-select" name="comparador2" id="comparador2">
                 	<option value="ilike" <?php if(isset($comparador2)) if($comparador2 === 'ilike') echo 'selected';?>>Contiene</option>
                     <option value="=" <?php if(isset($comparador2)) if($comparador2 === '=') echo 'selected';?>>Igual</option>
+                    <option value="<>" <?php if(isset($comparador2)) if($comparador2 === '<>') echo 'selected';?>>Distinto</option>
                     <option value=">=" <?php if(isset($comparador2)) if($comparador2 === '>=') echo 'selected';?>>Mayor o Igual</option>
                     <option value="<=" <?php if(isset($comparador2)) if($comparador2 === '<=') echo 'selected';?>>Menor o Igual</option>
                 </select>
@@ -112,17 +116,17 @@
         </div>
     </div>
 	<!-- Fin del form 2 -->
-	
+
  </form>
- 
+
  @section('script')
- 
+
  <script type="text/javascript">
- 
+
  	function select_columna1(){
-		
+
 		$('#where1_datalist').empty();
-		
+
 		var consulta1;
 
         //hacemos focus al campo de búsqueda
@@ -130,8 +134,8 @@
 
         //obtenemos el texto introducido en el campo de búsqueda
         consulta1 = $("#columna_selected1").val();
-		
-		
+
+
 		//alert(consulta)
 
         //hace la búsqueda
@@ -147,19 +151,19 @@
               success: function(result){
 
                   $.each( result, function(k,v) {
-					  
+
                         $('#where1_datalist').append($('<option>', {text:v}));
                   });
 
               }
         });
-		
+
 	}
-	 
+
 	function select_columna2(){
-		
+
 		$('#where2_datalist').empty();
-		
+
 		var consulta2;
 
         //hacemos focus al campo de búsqueda
@@ -167,8 +171,8 @@
 
         //obtenemos el texto introducido en el campo de búsqueda
         consulta2 = $("#columna_selected2").val();
-		
-		
+
+
 		//alert(consulta)
 
         //hace la búsqueda
@@ -184,51 +188,65 @@
               success: function(result){
 
                   $.each( result, function(k,v) {
-					  
+
                         $('#where2_datalist').append($('<option>', {text:v}));
                   });
 
               }
         });
-		
+
 	}
-	 
+
 	function agregar_busqueda_1(){
-		
+
 		document.getElementById("div_consulta_2").removeAttribute("hidden");
-		
+
 		document.getElementById("div_botones_1_consulta_1").setAttribute("hidden","true");
-		
+
 		document.getElementById("check_acentos_1").setAttribute("hidden","true");
-		
+
 		document.getElementById("div_botones_2_consulta_1").removeAttribute("hidden");
-		
+
 		document.getElementById("columna_selected2").setAttribute("required","true");
-		
+
 		document.getElementById("where2").setAttribute("required","true");
-		
+
 	}
-	 
+
 	function quitar_busqueda_1(){
-		
+
 		document.getElementById("div_consulta_2").setAttribute("hidden","true");
-		
+
 		document.getElementById("div_botones_1_consulta_1").removeAttribute("hidden");
-		
+
 		document.getElementById("div_botones_2_consulta_1").setAttribute("hidden","true");
-		
+
 		document.getElementById("columna_selected2").removeAttribute("required");
-		
+
 		document.getElementById("where2").removeAttribute("required");
-		
+
 		document.getElementById("columna_selected2").value = '';
-		
+
 		document.getElementById("where2").value = null;
-		
+
 		document.getElementById("check_acentos_1").removeAttribute("hidden");
-		
+
 	}
- 
+
+    function where_null(){
+
+        var comparador1 = document.getElementById("comparador1").value;
+
+        if(comparador1 == 'is_null' || comparador1 == 'not_null'){
+            document.getElementById("where1").setAttribute("disabled","true");
+            document.getElementById("where1").removeAttribute("required");
+        }else{
+            document.getElementById("where1").setAttribute("required","true");
+            document.getElementById("where1").removeAttribute("disabled");
+        }
+
+    }
+
  </script>
- 
+
  @endsection
