@@ -69,6 +69,15 @@
     </div>
 @endif
 
+@if(session()->get('ok'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert" style="max-width:600px;margin:5px auto 10px auto" align="center">
+      <strong>{{ session()->get('ok') }}</strong>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+@endif
+
 @if(isset($db_host) && isset($db_usuario))
 
 	<div class="alert-success cartel-host" align="center">

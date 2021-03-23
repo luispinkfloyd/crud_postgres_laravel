@@ -21,6 +21,8 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::post('/host', 'HomeController@host')->name('host');
 
+Route::post('/create_base', 'HomeController@create_base')->name('create_base');
+
 Route::get('/database', 'HomeController@database')->name('database');
 
 Route::get('/schema', 'HomeController@schema')->name('schema');
@@ -38,4 +40,6 @@ Route::get('/edit/{id}', 'HomeController@edit')->name('home.edit');
 Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
 
 Route::get('/ajax_columna','AjaxController@ajax_columna')->name('ajax_columna');
+
+Route::get('/verificar_host','AjaxController@ajax_host')->name('verificar_host');
 

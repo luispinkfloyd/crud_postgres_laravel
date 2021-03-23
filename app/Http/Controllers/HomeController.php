@@ -16,6 +16,7 @@ use Cache;
 
 use Illuminate\Support\Facades\Input;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Base;
 
 class HomeController extends Controller
 {
@@ -1046,6 +1047,29 @@ class HomeController extends Controller
 
 		}
 		catch (\Exception $e)
+		{
+
+			$mensaje_error = $e->getMessage();
+
+			return back()->withInput()->with('mensaje_error',$mensaje_error);
+
+		}
+    }
+
+    public function create_base(Request $request)
+    {
+        try
+        {
+            $base = new Base;
+            $base->servidor = $request->servidor_bases;
+            $base->usuario = $request->usuario_bases;
+            $base->password = $request->password_bases;
+            $base->save();
+
+            return back()->withInput()->with('ok', 'El servidor se agregó correctamente');
+
+        }
+        catch (\Exception $e)
 		{
 
 			$mensaje_error = $e->getMessage();
