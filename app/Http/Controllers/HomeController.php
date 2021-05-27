@@ -410,7 +410,9 @@ class HomeController extends Controller
 								,is_nullable as required
 								,character_maximum_length as max_char
 								,data_type as type
-								,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
+								,case when data_type = 'integer' then data_type
+                                      else data_type||coalesce('('||character_maximum_length::text||')','')||coalesce('('||numeric_precision::text||','||numeric_scale::text||')','')
+                                 end as data_type
 							from INFORMATION_SCHEMA.columns col
 						   where table_name = '".$tabla_selected."'
 							 and table_schema = '".$schema."'

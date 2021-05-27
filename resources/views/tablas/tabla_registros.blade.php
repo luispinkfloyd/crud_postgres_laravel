@@ -108,6 +108,11 @@
                             <input type="hidden" name="comparador1" value="{{$comparador1}}">
                             <input type="hidden" name="where1" value="{{$where1}}">
                         @endif
+                        @if(isset($where2))
+                            <input type="hidden" name="columna_selected2" value="{{$columna_selected2}}">
+                            <input type="hidden" name="comparador2" value="{{$comparador2}}">
+                            <input type="hidden" name="where2" value="{{$where2}}">
+                        @endif
                         <input type="hidden" name="sort" value="asc">
                         <button type="submit" class="btn btn-sm btn-link" style="padding-top:0; padding-bottom:0; padding-right:0; padding-left:0;">
 													  <img src="{{ asset('img/arriba.png')}}" height="14">
@@ -125,6 +130,11 @@
                             <input type="hidden" name="comparador1" value="{{$comparador1}}">
                             <input type="hidden" name="where1" value="{{$where1}}">
                         @endif
+                        @if(isset($where2))
+                            <input type="hidden" name="columna_selected2" value="{{$columna_selected2}}">
+                            <input type="hidden" name="comparador2" value="{{$comparador2}}">
+                            <input type="hidden" name="where2" value="{{$where2}}">
+                        @endif
                         <input type="hidden" name="sort" value="desc">
                         <button type="submit" class="btn btn-sm btn-link" style="padding-top:0; padding-bottom:0; padding-right:0; padding-left:0;">
 													  <img src="{{ asset('img/abajo.png')}}" height="14">
@@ -133,7 +143,7 @@
                         </button>
                     </form>
                     <br>
-                    <small>{{$columna->data_type}}</small>
+                    <small>{{$columna->data_type}} @if($columna->required == 'YES') {{'(NULL)'}} @else {{'(NOT NULL)'}} @endif</small>
                     <?php $ordercol++ ?>
                 </th>
             @endforeach
@@ -160,15 +170,32 @@
                               $columna_registro = $columna->column_name;
                           ?>
 
-                          	  @if($charset_def !== 'UTF8')
+                          	@if($charset_def !== 'UTF8')
 
-                              	<td>{{utf8_encode($registro->$columna_registro)}}</td>
+                                @if($columna->data_type == 'boolean')
 
-                              @else
+                                    <td>@if($registro->$columna_registro == true) {{'true'}} @else {{'false'}} @endif</td>
 
-                              	<td>{{$registro->$columna_registro}}</td>
+                                @else
 
-                              @endif
+                                    <td>{{utf8_encode($registro->$columna_registro)}}</td>
+
+                                @endif
+
+
+                            @else
+
+                                @if($columna->data_type == 'boolean')
+
+                                    <td>@if($registro->$columna_registro == true) {{'true'}} @else {{'false'}} @endif</td>
+
+                                @else
+
+                                    <td>{{$registro->$columna_registro}}</td>
+
+                                @endif
+
+                            @endif
 
                       @endforeach
                   </tr>

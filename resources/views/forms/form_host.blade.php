@@ -14,13 +14,13 @@
             <input type="password" class="form-control" value="{{old('db_contrasenia')}}" id="db_contrasenia" name="db_contrasenia" placeholder="Contraseña" autocomplete="new-password" required>
         </div>
         <div class="col-sm-2 form-group form-host-col-submit">
-            <button type="submit" class="btn btn-primary">Seleccionar</button>
+            <button type="submit" class="btn btn-success">Seleccionar</button>
         </div>
     </div>
 </form>
 
 <div class="container" style="margin-top:20px" align="center">
-    <a href="#modal-form-bases" class="btn btn-success" data-toggle="modal" data-target="#modal-form-bases">Crear nuevo servidor</a>
+    <a href="#modal-form-bases" class="btn btn-primary" data-toggle="modal" data-target="#modal-form-bases">Crear nuevo servidor</a>
 </div>
 
 @include('forms.form_bases')

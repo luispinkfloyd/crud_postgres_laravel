@@ -2,7 +2,7 @@
 foreach($columnas as $columna){
 
 	$primera_columna = $columna->column_name;
-	
+
 	break;
 
 }
@@ -18,11 +18,11 @@ foreach($columnas as $columna){
                 <input type="hidden" name="schema" value="{{$schema}}">
                 <input type="hidden" name="tabla_selected" value="{{$tabla_selected}}">
                 <input type="hidden" name="primera_columna" value="{{$primera_columna}}">
-                <div class="modal-header">						
+                <div class="modal-header">
                     <h4 class="modal-title">Editar Registro</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
-                <div class="modal-body">					
+                <div class="modal-body">
                     @foreach($columnas as $columna)
                     	<?php
 							$nombre_columna = $columna->column_name;
@@ -32,9 +32,9 @@ foreach($columnas as $columna){
                             <input type="text" class="form-control" name="{{$columna->column_name}}" value="{{$registro->$nombre_columna}}" readonly>
                         @elseif($columna->type === 'character' | $columna->type === 'character varying' | $columna->type === 'text' | $columna->type === 'char' | $columna->type === 'varchar')
                         <div class="form-group">
-                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                            <label for="{{$columna->column_name}}">{{$columna->column_name}}
                             <small>
-                            <?php 
+                            <?php
 							if($columna->required === 'NO'){
 								echo '(Obligatorio)';
 							}else{
@@ -56,9 +56,9 @@ foreach($columnas as $columna){
                         </div>
                         @elseif($columna->type === 'int' | $columna->type === 'integer' | $columna->type === 'smallint' or $columna->type === 'bigint' | $columna->type === 'numeric')
                         <div class="form-group">
-                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                            <label for="{{$columna->column_name}}">{{$columna->column_name}}
                             <small>
-                            <?php 
+                            <?php
 							if($columna->required === 'NO'){
 								echo '(Obligatorio)';
 							}else{
@@ -79,9 +79,9 @@ foreach($columnas as $columna){
                         </div>
                         @elseif($columna->type === 'date')
                         <div class="form-group">
-                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                            <label for="{{$columna->column_name}}">{{$columna->column_name}}
                             <small>
-                            <?php 
+                            <?php
 							if($columna->required === 'NO'){
 								echo '(Obligatorio)';
 							}else{
@@ -102,9 +102,9 @@ foreach($columnas as $columna){
                         </div>
                         @elseif($columna->type === 'timestamp without time zone' or $columna->type === 'timestamp with time zone')
                         <div class="form-group">
-                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                            <label for="{{$columna->column_name}}">{{$columna->column_name}}
                             <small>
-                            <?php 
+                            <?php
 							if($columna->required === 'NO'){
 								echo '(Obligatorio)';
 							}else{
@@ -112,7 +112,7 @@ foreach($columnas as $columna){
 							}
 							?>
                             </small>:</label>
-                            
+
                             <input type="text" class="form-control" name="{{$columna->column_name}}"
                             <?php
 							if($columna->required === 'NO') echo ' required ';
@@ -126,9 +126,9 @@ foreach($columnas as $columna){
                         </div>
                         @elseif($columna->type === 'boolean')
                         <div class="form-group">
-                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                            <label for="{{$columna->column_name}}">{{$columna->column_name}}
                                 <small>
-                                <?php 
+                                <?php
                                 if($columna->required === 'NO'){
                                     echo '(Obligatorio)';
                                 }else{
@@ -144,14 +144,14 @@ foreach($columnas as $columna){
                             >
                             <option disabled selected value>--Seleccione--</option>
                             <option <?php if($registro->$nombre_columna === true) echo'selected'; ?>>true</option>
-                            <option <?php if($registro->$nombre_columna === false) echo'selected'; ?>>false</option>
+                            <option <?php if($registro->$nombre_columna !== true) echo'selected'; ?>>false</option>
                             </select>
                         </div>
                         @elseif($columna->type === 'time without time zone')
                         <div class="form-group">
-                            <label for="{{$columna->column_name}}">{{$columna->column_name}} 
+                            <label for="{{$columna->column_name}}">{{$columna->column_name}}
                                 <small>
-                                <?php 
+                                <?php
                                 if($columna->required === 'NO'){
                                     echo '(Obligatorio)';
                                 }else{
