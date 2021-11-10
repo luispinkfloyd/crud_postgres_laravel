@@ -55,6 +55,13 @@
         border-bottom: none;
         border-radius: 5px 5px 0px 0px;
 	}
+    .borde-top-bottom{
+		border:#888888 solid 1px;
+        border-radius: 5px 5px 5px 5px;
+	}
+    .table-size{
+        max-width: 1000px;
+    }
 </style>
 @endsection
 
@@ -93,31 +100,45 @@
 
 @endif
 
+@if(session()->get('buscador_string_view'))
 
-@if(isset($bases))
-
-    @include('forms.form_database')
-
-@elseif(isset($database) && !isset($schema))
-
-	@include('forms.form_schema')
-
-@elseif(isset($schema))
-
-	@include('forms.form_tabla')
-
-	@if(isset($registros))
-
-        @include('tablas.tabla_registros')
-        @include('modals.modal_create')
-        @include('modals.modal_delete')
-        @include('modals.modal_edit')
-
+    @include('forms.form_busqueda_string')
+    @if(isset($resultados))
+        @include('tablas.tabla_resultados_buscador_string')
     @endif
+    <div class="container" style="margin-top: 20px; text-align:center">
+        <a class="btn btn-sm btn-info" href="{{ url('/') }}">Volver a seleccionar todo</a>
+    </div>
 
 @else
 
-    @include('forms.form_host')
+
+    @if(isset($bases))
+
+        @include('forms.form_database')
+
+    @elseif(isset($database) && !isset($schema))
+
+        @include('forms.form_schema')
+
+    @elseif(isset($schema))
+
+        @include('forms.form_tabla')
+
+        @if(isset($registros))
+
+            @include('tablas.tabla_registros')
+            @include('modals.modal_create')
+            @include('modals.modal_delete')
+            @include('modals.modal_edit')
+
+        @endif
+
+    @else
+
+        @include('forms.form_host')
+
+    @endif
 
 @endif
 

@@ -211,3 +211,7 @@
 <div class="container div-paginacion">
     {{$registros->appends(Illuminate\Support\Facades\Input::except('page'))->links()}}
 </div>
+<div class="alert alert-info w-50" role="alert" style="margin:10px auto 0px auto">
+    <h1 class="display-5">Consulta</h1>
+    <p class="lead"><b>{{$consulta_de_registros}}</b></p>
+</div>

@@ -65,5 +65,39 @@ class AjaxController extends Controller
 
 	}
 
+    public function ajax_get_bases_string(Request $request){
+
+        $db_usuario = $request->db_usuario_string;
+        $db_host = $request->db_host_string;
+        $db_contrasenia_string = $request->db_contrasenia_string;
+
+		Config::set('database.connections.pgsql_variable', array(
+                    'driver'    => 'pgsql',
+                    'host'      => $db_host,
+                    'database'  => 'postgres',
+                    'username'  => $db_usuario,
+                    'password'  => $db_contrasenia_string,
+                    'charset'   => 'utf8',
+                    'collation' => 'utf8_unicode_ci',
+                    'prefix'    => '',
+                    'schema'    => 'public',
+					));
+
+		$conexion = DB::connection('pgsql_variable');
+
+		$sql="select pg_database.datname
+						  from pg_database
+						 where pg_database.datname not in ('template0','template1')
+					  order by pg_database.datname;";
+
+		$bases = $conexion->select($sql);
+
+		foreach($bases as $base) {
+            $bases_valores_array[] = (array) $base->datname;
+        }
+
+		return response()->json($bases_valores_array);
+    }
+
 
 }

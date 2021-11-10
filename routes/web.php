@@ -43,3 +43,7 @@ Route::get('/ajax_columna','AjaxController@ajax_columna')->name('ajax_columna');
 
 Route::get('/verificar_host','AjaxController@ajax_host')->name('verificar_host');
 
+Route::get('/get_bases_string','AjaxController@ajax_get_bases_string')->name('get_bases_string');
+
+Route::get('/buscador_string','buscadorController@buscador_string')->name('buscador_string');
+

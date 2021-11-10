@@ -53,6 +53,16 @@ class HomeController extends Controller
 
 		session()->forget('db_contrasenia');
 
+        session()->forget('db_usuario_string');
+
+		session()->forget('db_host_string');
+
+		session()->forget('db_contrasenia_string');
+
+        session()->forget('db_database_string');
+
+		session()->forget('buscador_string_view');
+
 		return view('home');
 
     }
@@ -586,6 +596,8 @@ class HomeController extends Controller
 
 					$count_registros = count($registros->get());
 
+                    $consulta_de_registros = str_replace_array('?', $registros->getBindings(), $registros->toSql());
+
 					$registros = $registros->orderBy(DB::raw($col_string))->get()->toArray();
 
 					if(isset($request->where1) && isset($request->caracteres_raros)){
@@ -603,6 +615,10 @@ class HomeController extends Controller
 					Cache::forget('registros');
 
 					Cache::put('registros',$registros,3600);
+
+                    Cache::forget('consulta_de_registros');
+
+					Cache::put('consulta_de_registros',$consulta_de_registros,3600);
 
 					Cache::forget('count_registros');
 
@@ -648,6 +664,8 @@ class HomeController extends Controller
 
 					$count_registros = Cache::get('count_registros');
 
+                    $consulta_de_registros = Cache::get('consulta_de_registros');
+
 				}
 
 				/*-----------------------------------------------------*/
@@ -679,7 +697,8 @@ class HomeController extends Controller
 									'count_registros' => $count_registros,
 									'sort' => $sort,
 									'ordercol_def' => $ordercol,
-									'caracteres_raros' => $caracteres_raros]);
+									'caracteres_raros' => $caracteres_raros,
+                                    'consulta_de_registros' => $consulta_de_registros]);
 
 			}else{
 
