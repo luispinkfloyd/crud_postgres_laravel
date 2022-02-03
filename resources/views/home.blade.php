@@ -19,7 +19,7 @@
 	}
 	.tabla-resultados{
 		max-width:90%;
-		max-height:350px;
+		max-height:550px;
 		margin:5px auto;
 		white-space:nowrap;
 	}
@@ -39,7 +39,7 @@
 		padding:1px;
 	}
 	.div-paginacion{
-		min-width:90%;
+		min-width: width auto;
 		margin-top:10px auto;
 	}
 	.borde{

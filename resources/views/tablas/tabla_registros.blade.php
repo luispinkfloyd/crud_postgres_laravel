@@ -144,7 +144,6 @@
                     </form>
                     <br>
                     <small>{{$columna->data_type}} @if($columna->required == 'YES') {{'(NULL)'}} @else {{'(NOT NULL)'}} @endif</small>
-                    <?php $ordercol++ ?>
                 </th>
             @endforeach
             </tr>
@@ -162,8 +161,8 @@
 				}
 				?>
                 <td>
-                	<a href="#deleteModal<?php echo str_replace('.','_',$registro->$primera_columna); ?>" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Borrar">delete</i></a>
-                    <a href="#editModal<?php echo str_replace('.','_',$registro->$primera_columna); ?>" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Editar">edit</i></a>
+                	<a href="#deleteModal<?php echo str_replace('.','_',$registro->$primera_columna); ?>" class="delete" data-toggle="modal"><i class="material-icons text-danger" data-toggle="tooltip" title="Borrar">delete</i></a>
+                    <a href="#editModal<?php echo str_replace('.','_',$registro->$primera_columna); ?>" class="edit" data-toggle="modal"><i class="material-icons text-info" data-toggle="tooltip" title="Editar">edit</i></a>
                 </td>
                       @foreach($columnas as $columna)
                           <?php
@@ -209,7 +208,13 @@
     </table>
 </div>
 <div class="container div-paginacion">
-    {{$registros->appends(Illuminate\Support\Facades\Input::except('page'))->links()}}
+    <div class="row form-group">
+        <div class="col-sm"></div>
+        <div class="col-sm">
+            {{$registros->appends(Illuminate\Support\Facades\Input::except('page'))->links()}}
+        </div>
+        <div class="col-sm"></div>
+    </div>
 </div>
 <div class="alert alert-info w-50" role="alert" style="margin:10px auto 0px auto">
     <h1 class="display-5">Consulta</h1>

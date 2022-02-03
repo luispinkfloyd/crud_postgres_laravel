@@ -31,7 +31,7 @@ class HomeController extends Controller
 
 		$page = Input::get('page', 1);
 
-		$perPage = 5;
+		$perPage = 8;
 
 		$offset = ($page * $perPage) - $perPage;
 
@@ -420,6 +420,7 @@ class HomeController extends Controller
 								,is_nullable as required
 								,character_maximum_length as max_char
 								,data_type as type
+								,column_default as default
 								,case when data_type = 'integer' then data_type
                                       else data_type||coalesce('('||character_maximum_length::text||')','')||coalesce('('||numeric_precision::text||','||numeric_scale::text||')','')
                                  end as data_type
@@ -792,6 +793,7 @@ class HomeController extends Controller
 						,is_nullable as required
 						,character_maximum_length as max_char
 						,data_type as type
+						,column_default as default
 						,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
 					from INFORMATION_SCHEMA.columns col
 				   where table_name = '".$tabla_selected."'
@@ -963,6 +965,7 @@ class HomeController extends Controller
 						,is_nullable as required
 						,character_maximum_length as max_char
 						,data_type as type
+						,column_default as default
 						,data_type||coalesce('('||character_maximum_length::text||')','') as data_type
 					from INFORMATION_SCHEMA.columns col
 				   where table_name = '".$tabla_selected."'
