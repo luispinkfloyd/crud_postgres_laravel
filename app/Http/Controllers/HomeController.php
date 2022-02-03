@@ -14,9 +14,10 @@ use ReflectionClass;
 
 use Cache;
 
-use Illuminate\Support\Facades\Input;
+//use Illuminate\Support\Facades\Input;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Base;
+use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
@@ -29,7 +30,7 @@ class HomeController extends Controller
 	public function paginacion($array, $request)
 	{
 
-		$page = Input::get('page', 1);
+		$page = $request->input('page', 1);
 
 		$perPage = 8;
 
@@ -597,7 +598,8 @@ class HomeController extends Controller
 
 					$count_registros = count($registros->get());
 
-                    $consulta_de_registros = str_replace_array('?', $registros->getBindings(), $registros->toSql());
+                    $consulta_de_registros = Str::replaceArray('?', $registros->getBindings(), $registros->toSql());
+					//str_replace_array('?', $registros->getBindings(), $registros->toSql()); -- str_replace_array Deprecated
 
 					$registros = $registros->orderBy(DB::raw($col_string))->get()->toArray();
 

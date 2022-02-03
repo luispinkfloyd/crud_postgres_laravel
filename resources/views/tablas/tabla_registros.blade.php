@@ -211,7 +211,8 @@
     <div class="row form-group">
         <div class="col-sm"></div>
         <div class="col-sm">
-            {{$registros->appends(Illuminate\Support\Facades\Input::except('page'))->links()}}
+            {{--$registros->appends(Illuminate\Support\Facades\Input::except('page'))->links()--}}
+            {{$registros->withPath('tabla')->appends(request()->except('page'))->links()}}
         </div>
         <div class="col-sm"></div>
     </div>
