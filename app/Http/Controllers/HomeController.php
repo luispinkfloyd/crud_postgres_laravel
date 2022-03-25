@@ -7,16 +7,12 @@ use DB;
 use Config;
 use App\Exports\ExcelExport;
 use Maatwebsite\Excel\Facades\Excel;
-
 use Session;
-
 use ReflectionClass;
-
 use Cache;
-
-//use Illuminate\Support\Facades\Input;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Base;
+use App\Grupo;
 use Illuminate\Support\Str;
 
 class HomeController extends Controller
@@ -64,7 +60,9 @@ class HomeController extends Controller
 
 		session()->forget('buscador_string_view');
 
-		return view('home');
+		$grupos = Grupo::all();
+
+		return view('home',compact('grupos'));
 
     }
 
@@ -80,11 +78,13 @@ class HomeController extends Controller
 
 			if($request->session()->get('db_usuario') === NULL && $request->session()->get('db_host') === NULL){
 
-				$request->session()->put('db_host',$request->db_host);
+				$base = Base::find($request->db_host);
 
-				$request->session()->put('db_usuario',$request->db_usuario);
+				$request->session()->put('db_host',$base->host);
 
-				$request->session()->put('db_contrasenia',$request->db_contrasenia);
+				$request->session()->put('db_usuario',$base->usuario);
+
+				$request->session()->put('db_contrasenia',$base->password);
 
 			}
 
@@ -1088,11 +1088,34 @@ class HomeController extends Controller
         {
             $base = new Base;
             $base->servidor = $request->servidor_bases;
+			$base->host = $request->host_bases;
             $base->usuario = $request->usuario_bases;
             $base->password = $request->password_bases;
+			$base->grupo = $request->grupo_bases;
             $base->save();
 
-            return back()->withInput()->with('ok', 'El servidor se agregó correctamente');
+            return back()->withInput()->with('ok', "El servidor $request->servidor_bases se agregó correctamente");
+
+        }
+        catch (\Exception $e)
+		{
+
+			$mensaje_error = $e->getMessage();
+
+			return back()->withInput()->with('mensaje_error',$mensaje_error);
+
+		}
+    }
+
+	public function create_grupo(Request $request)
+    {
+        try
+        {
+            $grupo = new Grupo;
+            $grupo->nombre = $request->nombre_grupo;
+            $grupo->save();
+
+            return back()->withInput()->with('ok', "El grupo $request->nombre_grupo se generó correctamente");
 
         }
         catch (\Exception $e)

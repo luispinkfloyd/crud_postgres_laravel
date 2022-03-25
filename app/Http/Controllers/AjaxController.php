@@ -54,9 +54,20 @@ class AjaxController extends Controller
 
 	}
 
+    public function ajax_grupo(Request $request){
+
+		$grupo = Base::where('grupo',$request->grupo_selected)->get();
+        if(count($grupo) >= 1){
+            return $grupo;
+        }else{
+            return false;
+        }
+
+	}
+
     public function ajax_host(Request $request){
 
-		$base = Base::where('servidor',$request->servidor_bases_selected)->get();
+		$base = Base::where('id',$request->host_selected)->get();
         if(count($base) == 1){
             return $base;
         }else{

@@ -16,8 +16,10 @@ class Bases extends Migration
         Schema::create('bases', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('servidor');
+            $table->string('host');
             $table->string('usuario');
             $table->string('password');
+            $table->integer('grupo');
             $table->timestamps();
         });
     }

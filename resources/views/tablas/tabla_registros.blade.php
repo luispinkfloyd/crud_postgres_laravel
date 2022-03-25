@@ -89,7 +89,7 @@
         	<h3 style="margin:2px;">Nombre de tabla: <b>{{$tabla_selected}}</b> | <small>Total registros = <b>{{$count_registros}}</b></small></h3>
         </div>
     </div>
-    <?php $ordercol = 1; ?>
+    @php($ordercol = 1)
 </div>
 <div class="table-responsive tabla-resultados borde-top" style="margin-top: 0px">
     <table class="table table-sm table-bordered table-striped table-hover">
@@ -145,6 +145,7 @@
                     <br>
                     <small>{{$columna->data_type}} @if($columna->required == 'YES') {{'(NULL)'}} @else {{'(NOT NULL)'}} @endif</small>
                 </th>
+                @php($ordercol++)
             @endforeach
             </tr>
         </thead>

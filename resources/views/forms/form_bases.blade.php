@@ -12,8 +12,14 @@
                 <div class="modal-body color-modal-form-pastel">
 					<div class="row form-group">
                         <div class="col">
-                            <label for="servidor_bases">Servidor <small class="small-color">(*)</small>:</label>
+                            <label for="servidor_bases">Nombre del Servidor <small class="small-color">(*)</small>:</label>
 						    <input type="text" class="form-control" name="servidor_bases" id="servidor_bases" required>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col">
+                            <label for="host_bases">Host <small class="small-color">(*)</small>:</label>
+						    <input type="text" class="form-control" name="host_bases" id="host_bases" required>
                         </div>
                     </div>
                     <div class="row form-group">
@@ -26,6 +32,17 @@
                         <div class="col">
                             <label for="password_bases">Contraseña <small class="small-color">(*)</small>:</label>
 						    <input type="text" class="form-control" name="password_bases" id="password_bases" required>
+                        </div>
+					</div>
+                    <div class="row form-group">
+                        <div class="col">
+                            <label for="grupo_bases">Grupo <small class="small-color">(*)</small>:</label>
+						    <select class="form-control" name="grupo_bases" id="grupo_bases" required>
+                                <option value selected disabled>--Seleccione--</option>
+                                @foreach ($grupos as $grupo)
+                                    <option value="{{$grupo->id}}">{{$grupo->nombre}}</option>
+                                @endforeach
+                            </select>
                         </div>
 					</div>
                 </div>
