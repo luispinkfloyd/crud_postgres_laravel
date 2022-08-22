@@ -86,7 +86,16 @@
             @endif
         </div>
         <div class="col-8">
-        	<h3 style="margin:2px;">Nombre de tabla: <b>{{$tabla_selected}}</b> | <small>Total registros = <b>{{$count_registros}}</b></small></h3>
+        	<h3 style="margin:2px;">Nombre de tabla:
+                @if($schema == 'public')
+                    <b>{{$tabla_selected}}</b> | 
+                @else
+                    <b>{{$schema.'.'.$tabla_selected}}</b> | 
+                @endif
+                <small>Total registros = 
+                    <b>{{$count_registros}}</b>
+                </small>
+            </h3>
         </div>
     </div>
     @php($ordercol = 1)
